@@ -33,3 +33,9 @@ captures/
 
 # Firebase / service configuration (add intentionally later)
 google-services.json
+
+# Local phase update backups
+.phase-backups/
+
+# Extracted phase update packages
+phase-*-update/

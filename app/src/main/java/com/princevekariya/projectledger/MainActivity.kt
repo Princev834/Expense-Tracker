@@ -68,7 +68,7 @@ private fun ProjectReadyScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Android project initialized successfully.",
+                    text = "Gradle build convention configured successfully.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -76,7 +76,7 @@ private fun ProjectReadyScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "Phase 2 checkpoint",
+                    text = "Phase 3 • ${BuildConfig.APP_ENVIRONMENT}",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )

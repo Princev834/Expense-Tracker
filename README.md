@@ -50,3 +50,13 @@ Install the debug APK on a connected phone:
 ## Repository policy
 
 Do not commit local SDK paths, signing keys, environment files, service credentials, or production secrets. The included `.gitignore` excludes these files.
+
+<!-- PHASE-3-CHECKPOINT -->
+## Current development checkpoint
+
+- Phase 0: architecture and roadmap â€” complete
+- Phase 1: environment setup â€” complete
+- Phase 2: project initialization â€” complete
+- Phase 3: Gradle build convention â€” complete
+
+The development build uses the separate package `com.princevekariya.projectledger.debug` and appears on Android as **Project Ledger Dev**.
