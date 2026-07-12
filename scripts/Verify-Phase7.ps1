@@ -75,6 +75,9 @@ foreach ($file in $requiredFiles) {
 
 Assert-FileContains -Path $workflowFile -ExpectedText "actions/checkout@v6"
 Assert-FileContains -Path $workflowFile -ExpectedText "actions/setup-java@v5"
+Assert-FileContains -Path $workflowFile -ExpectedText "android-actions/setup-android@v4"
+Assert-FileContains -Path $workflowFile -ExpectedText "platforms;android-34"
+Assert-FileContains -Path $workflowFile -ExpectedText "build-tools;34.0.0"
 Assert-FileContains -Path $workflowFile -ExpectedText "actions/upload-artifact@v6"
 Assert-FileContains -Path $workflowFile -ExpectedText "qualityCheck"
 Assert-FileContains -Path $workflowFile -ExpectedText ":app:assemblePersonalDebug"

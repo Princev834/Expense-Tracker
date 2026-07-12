@@ -37,12 +37,13 @@ jobs:
           java-version: "17"
           cache: gradle
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
+
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
-
-      - name: Ensure Android API 34 build tools
-        shell: bash
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 
       - name: Run quality checks, tests, and debug builds
         run: |
