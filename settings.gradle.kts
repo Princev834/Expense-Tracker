@@ -15,4 +15,16 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ProjectLedger"
+
 include(":app")
+
+include(":core:common")
+include(":core:model")
+include(":core:designsystem")
+
+include(":domain:transactions")
+
+include(":feature:dashboard")
+include(":feature:transactions")
+
+include(":platform:device")

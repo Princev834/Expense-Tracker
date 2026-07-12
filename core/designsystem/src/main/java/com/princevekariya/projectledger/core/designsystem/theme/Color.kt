@@ -1,4 +1,4 @@
-package com.princevekariya.projectledger.ui.theme
+package com.princevekariya.projectledger.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

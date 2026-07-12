@@ -96,12 +96,15 @@ android {
 }
 
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
+    implementation(project(":core:model"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":feature:dashboard"))
+    implementation(project(":platform:device"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.bundles.compose)
+    implementation(platform(libs.androidx.compose.bom))
 
     testImplementation(libs.junit4)
 

@@ -1,4 +1,4 @@
-powershell -ExecutionPolicy Bypass -File .\phase-4-update\Apply-Phase4.ps1# Project Ledger
+# Project Ledger
 
 Project Ledger is an offline-first Android personal finance application being built from scratch with Kotlin and Jetpack Compose.
 
@@ -8,7 +8,10 @@ Project Ledger is an offline-first Android personal finance application being bu
 
 - Phase 0: Architecture and roadmap — complete
 - Phase 1: Development environment — complete
-- Phase 2: Repository and starter Android project — in verification
+- Phase 2: Repository and starter Android project — complete
+- Phase 3: Gradle build convention — complete
+- Phase 4: Personal and Play product flavors — complete
+- Phase 5: Initial multi-module structure — in verification
 
 ## Development baseline
 
@@ -51,13 +54,12 @@ Install the debug APK on a connected phone:
 
 Do not commit local SDK paths, signing keys, environment files, service credentials, or production secrets. The included `.gitignore` excludes these files.
 
-<!-- PHASE-3-CHECKPOINT -->
 ## Current development checkpoint
 
-- Phase 0: architecture and roadmap â€” complete
-- Phase 1: environment setup â€” complete
-- Phase 2: project initialization â€” complete
-- Phase 3: Gradle build convention â€” complete
+- Phase 0: architecture and roadmap — complete
+- Phase 1: environment setup — complete
+- Phase 2: project initialization — complete
+- Phase 3: Gradle build convention — complete
 
 The development build uses the separate package `com.princevekariya.projectledger.debug` and appears on Android as **Project Ledger Dev**.
 
@@ -65,3 +67,9 @@ The development build uses the separate package `com.princevekariya.projectledge
 ## Phase 4 checkpoint
 
 Product flavors now separate the directly installed personal APK from the future Play Store-safe build. Normal development uses `personalDebug`; the `play` flavor excludes restricted SMS permissions.
+
+
+<!-- PHASE-5-CHECKPOINT -->
+## Phase 5 checkpoint
+
+The project now uses eight Gradle modules with explicit `core`, `domain`, `feature`, and `platform` boundaries. The app module is a thin composition root, the Compose theme lives in `:core:designsystem`, and the visible foundation screen lives in `:feature:dashboard`.

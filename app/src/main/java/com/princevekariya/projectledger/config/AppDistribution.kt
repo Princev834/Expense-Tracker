@@ -1,18 +1,8 @@
 package com.princevekariya.projectledger.config
 
 import com.princevekariya.projectledger.BuildConfig
-
-enum class AppDistribution {
-    PERSONAL,
-    PLAY,
-}
-
-data class AppVariantConfiguration(
-    val distribution: AppDistribution,
-    val displayName: String,
-    val supportsSmsAutomation: Boolean,
-    val isPlayStoreSafe: Boolean,
-)
+import com.princevekariya.projectledger.core.model.AppDistribution
+import com.princevekariya.projectledger.core.model.AppVariantConfiguration
 
 object CurrentAppVariant {
     val configuration: AppVariantConfiguration by lazy {
