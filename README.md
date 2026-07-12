@@ -11,7 +11,8 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 2: Repository and starter Android project — complete
 - Phase 3: Gradle build convention — complete
 - Phase 4: Personal and Play product flavors — complete
-- Phase 5: Initial multi-module structure — in verification
+- Phase 5: Initial multi-module structure — complete
+- Phase 6: Code-quality configuration — in verification
 
 ## Development baseline
 
@@ -27,49 +28,51 @@ Project Ledger is an offline-first Android personal finance application being bu
 
 ## Open the project
 
-Open the folder containing `settings.gradle.kts` in Android Studio. Allow Gradle synchronization to finish, select an authorized Android device, and run the `app` configuration.
+Open the folder containing `settings.gradle.kts` in Android Studio. Allow Gradle synchronization to finish, select an authorized Android device, and run the `app` configuration with the `personalDebug` build variant.
 
 ## Temporary application identity
 
 - Application ID: `com.princevekariya.projectledger`
+- Personal debug ID: `com.princevekariya.projectledger.personal.debug`
 - Display name: `Project Ledger`
 
 Both can be changed later when final branding is chosen.
 
 ## Build commands
 
-Windows PowerShell:
+Build the personal development APK:
 
 ```powershell
-.\gradlew.bat clean test assembleDebug
+.\gradlew.bat :app:assemblePersonalDebug --no-daemon --max-workers=1
 ```
 
-Install the debug APK on a connected phone:
+Run the repository quality gate:
 
 ```powershell
-.\gradlew.bat installDebug
+.\gradlew.bat qualityCheck --no-daemon --max-workers=1
+```
+
+Apply automatic formatting:
+
+```powershell
+.\gradlew.bat qualityFix --no-daemon --max-workers=1
 ```
 
 ## Repository policy
 
-Do not commit local SDK paths, signing keys, environment files, service credentials, or production secrets. The included `.gitignore` excludes these files.
-
-## Current development checkpoint
-
-- Phase 0: architecture and roadmap — complete
-- Phase 1: environment setup — complete
-- Phase 2: project initialization — complete
-- Phase 3: Gradle build convention — complete
-
-The development build uses the separate package `com.princevekariya.projectledger.debug` and appears on Android as **Project Ledger Dev**.
+Do not commit local SDK paths, signing keys, environment files, service credentials, or production secrets. The included `.gitignore` excludes these files. A repository-managed pre-commit hook blocks commits that fail formatting or static analysis.
 
 <!-- PHASE-4-CHECKPOINT -->
 ## Phase 4 checkpoint
 
-Product flavors now separate the directly installed personal APK from the future Play Store-safe build. Normal development uses `personalDebug`; the `play` flavor excludes restricted SMS permissions.
-
+Product flavors separate the directly installed personal APK from the future Play Store-safe build. Normal development uses `personalDebug`; the `play` flavor excludes restricted SMS permissions.
 
 <!-- PHASE-5-CHECKPOINT -->
 ## Phase 5 checkpoint
 
-The project now uses eight Gradle modules with explicit `core`, `domain`, `feature`, and `platform` boundaries. The app module is a thin composition root, the Compose theme lives in `:core:designsystem`, and the visible foundation screen lives in `:feature:dashboard`.
+The project uses eight Gradle modules with explicit `core`, `domain`, `feature`, and `platform` boundaries. The app module is a thin composition root, the Compose theme lives in `:core:designsystem`, and the visible foundation screen lives in `:feature:dashboard`.
+
+<!-- PHASE-6-CHECKPOINT -->
+## Phase 6 checkpoint
+
+Spotless, ktlint, detekt, compiler warning enforcement, and a Git pre-commit quality gate now protect the codebase before later feature development begins.

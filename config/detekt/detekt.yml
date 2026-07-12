@@ -1,0 +1,52 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: true
+  checkExhaustiveness: false
+
+complexity:
+  LongMethod:
+    active: true
+    threshold: 100
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 10
+    ignoreDefaultParameters: true
+    ignoreDataClasses: true
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+    thresholdInClasses: 20
+    thresholdInInterfaces: 15
+    thresholdInObjects: 20
+    thresholdInEnums: 15
+    ignoreDeprecated: true
+    ignorePrivate: false
+    ignoreOverridden: true
+
+naming:
+  FunctionNaming:
+    active: true
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+    functionPattern: '[a-zA-Z][a-zA-Z0-9_]*'
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'
+
+style:
+  ForbiddenComment:
+    active: true
+    comments:
+      - reason: 'Resolve FIXME markers before committing production code.'
+        value: 'FIXME:'
+      - reason: 'Resolve STOPSHIP markers before committing production code.'
+        value: 'STOPSHIP:'
+  MagicNumber:
+    active: false

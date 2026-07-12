@@ -31,10 +31,7 @@ data class FoundationDashboardUiState(
 )
 
 @Composable
-fun FoundationDashboard(
-    state: FoundationDashboardUiState,
-    modifier: Modifier = Modifier,
-) {
+fun FoundationDashboard(state: FoundationDashboardUiState, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -62,7 +59,7 @@ fun FoundationDashboard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Multi-module foundation configured successfully.",
+                    text = "Code-quality foundation configured successfully.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -93,7 +90,7 @@ fun FoundationDashboard(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = "Phase 5 • architecture foundation",
+                    text = "Phase 6 • code-quality foundation",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -103,10 +100,7 @@ fun FoundationDashboard(
 }
 
 @Composable
-private fun FoundationLine(
-    label: String,
-    value: String,
-) {
+private fun FoundationLine(label: String, value: String) {
     Text(
         text = "$label: $value",
         modifier = Modifier.padding(vertical = 3.dp),
@@ -117,6 +111,7 @@ private fun FoundationLine(
 
 @Preview(showBackground = true, backgroundColor = 0xFF0B0F14)
 @Composable
+@Suppress("UnusedPrivateMember")
 private fun FoundationDashboardPreview() {
     ProjectLedgerTheme {
         FoundationDashboard(
