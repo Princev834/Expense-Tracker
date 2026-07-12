@@ -21,14 +21,35 @@ android {
         }
     }
 
+    flavorDimensions += "distribution"
+
+    productFlavors {
+        create("personal") {
+            dimension = "distribution"
+            applicationIdSuffix = ".personal"
+            versionNameSuffix = "-personal"
+
+            buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"personal\"")
+            buildConfigField("Boolean", "SMS_AUTOMATION_AVAILABLE", "true")
+            buildConfigField("Boolean", "PLAY_STORE_SAFE", "false")
+        }
+
+        create("play") {
+            dimension = "distribution"
+            versionNameSuffix = "-play"
+
+            buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"play\"")
+            buildConfigField("Boolean", "SMS_AUTOMATION_AVAILABLE", "false")
+            buildConfigField("Boolean", "PLAY_STORE_SAFE", "true")
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             isDebuggable = true
             isMinifyEnabled = false
-
-            manifestPlaceholders["appLabel"] = "Project Ledger Dev"
 
             buildConfigField("String", "APP_ENVIRONMENT", "\"development\"")
             buildConfigField("Boolean", "ENABLE_VERBOSE_LOGGING", "true")
@@ -38,8 +59,6 @@ android {
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
-
-            manifestPlaceholders["appLabel"] = "Project Ledger"
 
             buildConfigField("String", "APP_ENVIRONMENT", "\"production\"")
             buildConfigField("Boolean", "ENABLE_VERBOSE_LOGGING", "false")

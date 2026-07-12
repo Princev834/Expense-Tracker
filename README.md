@@ -1,4 +1,4 @@
-# Project Ledger
+powershell -ExecutionPolicy Bypass -File .\phase-4-update\Apply-Phase4.ps1# Project Ledger
 
 Project Ledger is an offline-first Android personal finance application being built from scratch with Kotlin and Jetpack Compose.
 
@@ -60,3 +60,8 @@ Do not commit local SDK paths, signing keys, environment files, service credenti
 - Phase 3: Gradle build convention â€” complete
 
 The development build uses the separate package `com.princevekariya.projectledger.debug` and appears on Android as **Project Ledger Dev**.
+
+<!-- PHASE-4-CHECKPOINT -->
+## Phase 4 checkpoint
+
+Product flavors now separate the directly installed personal APK from the future Play Store-safe build. Normal development uses `personalDebug`; the `play` flavor excludes restricted SMS permissions.

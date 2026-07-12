@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.princevekariya.projectledger.config.CurrentAppVariant
 import com.princevekariya.projectledger.ui.theme.ProjectLedgerTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,6 +42,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun ProjectReadyScreen(modifier: Modifier = Modifier) {
+    val variant = CurrentAppVariant.configuration
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -68,7 +71,7 @@ private fun ProjectReadyScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Gradle build convention configured successfully.",
+                    text = "Product flavors configured successfully.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -76,7 +79,27 @@ private fun ProjectReadyScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "Phase 3 • ${BuildConfig.APP_ENVIRONMENT}",
+                    text = "Edition: ${variant.displayName}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = if (variant.supportsSmsAutomation) {
+                        "SMS automation capability: available"
+                    } else {
+                        "SMS automation capability: excluded"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = "Phase 4 • ${BuildConfig.APP_ENVIRONMENT}",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )

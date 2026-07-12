@@ -39,3 +39,33 @@ google-services.json
 
 # Extracted phase update packages
 phase-*-update/
+
+# Local phase update backups
+.phase-backups/
+
+# Extracted phase update packages
+phase-*-update/
+
+# Local phase update backups
+.phase-backups/
+
+# Extracted phase update packages
+phase-*-update/
+
+# Local phase update backups
+.phase-backups/
+
+# Extracted phase update packages
+phase-*-update/
+
+# Local phase update backups
+.phase-backups/
+
+# Extracted phase update packages
+phase-*-update/
+
+# Local phase update backups
+.phase-backups/
+
+# Extracted phase update packages
+phase-*-update/
