@@ -12,7 +12,9 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 3: Gradle build convention — complete
 - Phase 4: Personal and Play product flavors — complete
 - Phase 5: Initial multi-module structure — complete
-- Phase 6: Code-quality configuration — in verification
+- Phase 6: Code-quality configuration — complete
+- Phase 7: GitHub continuous integration — complete
+- Phase 8: Design tokens — complete
 
 ## Development baseline
 
@@ -62,17 +64,10 @@ Apply automatic formatting:
 
 Do not commit local SDK paths, signing keys, environment files, service credentials, or production secrets. The included `.gitignore` excludes these files. A repository-managed pre-commit hook blocks commits that fail formatting or static analysis.
 
-<!-- PHASE-4-CHECKPOINT -->
-## Phase 4 checkpoint
+## Foundation checkpoints
 
-Product flavors separate the directly installed personal APK from the future Play Store-safe build. Normal development uses `personalDebug`; the `play` flavor excludes restricted SMS permissions.
-
-<!-- PHASE-5-CHECKPOINT -->
-## Phase 5 checkpoint
-
-The project uses eight Gradle modules with explicit `core`, `domain`, `feature`, and `platform` boundaries. The app module is a thin composition root, the Compose theme lives in `:core:designsystem`, and the visible foundation screen lives in `:feature:dashboard`.
-
-<!-- PHASE-6-CHECKPOINT -->
-## Phase 6 checkpoint
-
-Spotless, ktlint, detekt, compiler warning enforcement, and a Git pre-commit quality gate now protect the codebase before later feature development begins.
+- Product flavors separate the directly installed personal APK from the future Play Store-safe build.
+- Eight Gradle modules establish explicit `core`, `domain`, `feature`, and `platform` boundaries.
+- Spotless, ktlint, detekt, compiler-warning enforcement, and a pre-commit hook protect the codebase.
+- GitHub Actions runs quality checks, unit tests, and both debug builds on pushes and pull requests.
+- The design system now provides centralized colors, typography, shapes, spacing, elevation, and motion tokens.
