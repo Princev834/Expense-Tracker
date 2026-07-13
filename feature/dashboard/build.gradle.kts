@@ -30,11 +30,17 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:model"))
+    api(project(":core:common"))
+    api(project(":core:model"))
     implementation(project(":core:designsystem"))
 
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+
+    testImplementation(libs.junit4)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

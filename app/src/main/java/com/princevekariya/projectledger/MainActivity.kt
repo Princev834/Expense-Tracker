@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.princevekariya.projectledger.config.CurrentAppVariant
 import com.princevekariya.projectledger.core.designsystem.theme.ProjectLedgerTheme
-import com.princevekariya.projectledger.feature.dashboard.FoundationDashboardUiState
+import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.navigation.ProjectLedgerApp
 import com.princevekariya.projectledger.platform.device.AndroidDeviceInfoProvider
 
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProjectLedgerTheme {
                 ProjectLedgerApp(
-                    dashboardState = FoundationDashboardUiState(
+                    dashboardInitialState = DashboardUiState(
                         variant = CurrentAppVariant.configuration,
                         platformDescription = deviceInfo.displayValue,
                         moduleCount = PROJECT_MODULE_COUNT,

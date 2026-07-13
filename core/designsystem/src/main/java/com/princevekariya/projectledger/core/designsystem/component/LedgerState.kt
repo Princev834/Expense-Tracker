@@ -56,3 +56,37 @@ fun LedgerLoadingState(message: String, modifier: Modifier = Modifier) {
         )
     }
 }
+
+@Composable
+fun LedgerErrorState(
+    title: String,
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    retryLabel: String = "Try again",
+) {
+    val spacing = MaterialTheme.ledgerSpacing
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(spacing.section),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spacing.small),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        LedgerSecondaryButton(
+            label = retryLabel,
+            onClick = onRetry,
+        )
+    }
+}

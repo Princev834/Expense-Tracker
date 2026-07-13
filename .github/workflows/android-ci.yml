@@ -52,6 +52,7 @@ jobs:
             :core:common:test \
             :core:model:test \
             :domain:transactions:test \
+            :feature:dashboard:testDebugUnitTest \
             :app:testPersonalDebugUnitTest \
             :app:testPlayDebugUnitTest \
             :app:assemblePersonalDebug \

@@ -12,14 +12,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.princevekariya.projectledger.core.common.UiLoadState
 import com.princevekariya.projectledger.core.designsystem.component.LedgerAmountField
 import com.princevekariya.projectledger.core.designsystem.component.LedgerEmptyState
+import com.princevekariya.projectledger.core.designsystem.component.LedgerErrorState
 import com.princevekariya.projectledger.core.designsystem.component.LedgerLoadingState
 import com.princevekariya.projectledger.core.designsystem.component.LedgerMetricCard
 import com.princevekariya.projectledger.core.designsystem.component.LedgerMetricTone
@@ -30,19 +28,10 @@ import com.princevekariya.projectledger.core.designsystem.component.LedgerTextFi
 import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionDirection
 import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionRow
 import com.princevekariya.projectledger.core.designsystem.theme.ledgerSpacing
-import com.princevekariya.projectledger.core.model.AppVariantConfiguration
-
-data class FoundationDashboardUiState(
-    val variant: AppVariantConfiguration,
-    val platformDescription: String,
-    val moduleCount: Int,
-)
 
 @Composable
-fun FoundationDashboard(state: FoundationDashboardUiState, modifier: Modifier = Modifier) {
+fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = MaterialTheme.ledgerSpacing
-    var description by remember { mutableStateOf("Lunch at college") }
-    var amount by remember { mutableStateOf("120") }
 
     Column(
         modifier = modifier
@@ -57,17 +46,33 @@ fun FoundationDashboard(state: FoundationDashboardUiState, modifier: Modifier = 
     ) {
         DashboardHeader(state = state)
         MetricSection()
-        ActionSection()
+        ActionSection(
+            onAddExpense = {
+                onAction(DashboardAction.AddExpenseClicked)
+            },
+            onAddIncome = {
+                onAction(DashboardAction.AddIncomeClicked)
+            },
+        )
         InputSection(
-            description = description,
-            onDescriptionChange = { description = it },
-            amount = amount,
-            onAmountChange = { amount = it },
+            description = state.description,
+            onDescriptionChange = {
+                onAction(DashboardAction.DescriptionChanged(value = it))
+            },
+            amount = state.amount,
+            onAmountChange = {
+                onAction(DashboardAction.AmountChanged(value = it))
+            },
         )
         TransactionSection()
-        StateSection()
+        StateSection(
+            loadState = state.loadState,
+            onRetry = {
+                onAction(DashboardAction.RetryRequested)
+            },
+        )
         Text(
-            text = "Phase 10 - navigation shell foundation",
+            text = "Phase 11 - application state foundation",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -75,7 +80,7 @@ fun FoundationDashboard(state: FoundationDashboardUiState, modifier: Modifier = 
 }
 
 @Composable
-private fun DashboardHeader(state: FoundationDashboardUiState) {
+private fun DashboardHeader(state: DashboardUiState) {
     val spacing = MaterialTheme.ledgerSpacing
 
     Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
@@ -85,7 +90,7 @@ private fun DashboardHeader(state: FoundationDashboardUiState) {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "The reusable component gallery is now hosted inside the app navigation shell.",
+            text = "The dashboard now follows one-way state flow through a lifecycle-aware ViewModel.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -123,25 +128,18 @@ private fun MetricSection() {
 }
 
 @Composable
-private fun ActionSection() {
-    val spacing = MaterialTheme.ledgerSpacing
-
+private fun ActionSection(onAddExpense: () -> Unit, onAddIncome: () -> Unit) {
     LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
         SectionTitle(title = "Actions")
         LedgerPrimaryButton(
             label = "Add expense",
-            onClick = {},
+            onClick = onAddExpense,
             modifier = Modifier.fillMaxWidth(),
         )
         LedgerSecondaryButton(
             label = "Add income",
-            onClick = {},
+            onClick = onAddIncome,
             modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            text = "Button spacing: ${spacing.medium}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -197,14 +195,27 @@ private fun TransactionSection() {
 }
 
 @Composable
-private fun StateSection() {
+private fun StateSection(loadState: UiLoadState, onRetry: () -> Unit) {
     LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle(title = "Reusable states")
-        LedgerEmptyState(
-            title = "No pending reviews",
-            message = "Detected transactions that need confirmation will appear here.",
-        )
-        LedgerLoadingState(message = "Preparing monthly summary")
+        SectionTitle(title = "Screen state")
+        when (loadState) {
+            UiLoadState.Idle -> LedgerEmptyState(
+                title = "Waiting to start",
+                message = "This screen has not requested its data yet.",
+            )
+            UiLoadState.Loading -> LedgerLoadingState(
+                message = "Preparing dashboard data",
+            )
+            UiLoadState.Content -> LedgerEmptyState(
+                title = "State is ready",
+                message = "Inputs, actions, and one-off messages now come from the ViewModel.",
+            )
+            is UiLoadState.Error -> LedgerErrorState(
+                title = "Unable to load dashboard",
+                message = loadState.message,
+                onRetry = onRetry,
+            )
+        }
     }
 }
 

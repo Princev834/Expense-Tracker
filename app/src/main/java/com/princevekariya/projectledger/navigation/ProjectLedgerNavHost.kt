@@ -8,14 +8,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
-import com.princevekariya.projectledger.feature.dashboard.FoundationDashboard
-import com.princevekariya.projectledger.feature.dashboard.FoundationDashboardUiState
+import com.princevekariya.projectledger.feature.dashboard.DashboardRoute
+import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.feature.transactions.TransactionsPlaceholderScreen
 
 @Composable
 internal fun ProjectLedgerNavHost(
     navController: NavHostController,
-    dashboardState: FoundationDashboardUiState,
+    dashboardInitialState: DashboardUiState,
     contentPadding: PaddingValues,
 ) {
     NavHost(
@@ -31,7 +31,7 @@ internal fun ProjectLedgerNavHost(
                 },
             ),
         ) {
-            FoundationDashboard(state = dashboardState)
+            DashboardRoute(initialState = dashboardInitialState)
         }
 
         composable(
