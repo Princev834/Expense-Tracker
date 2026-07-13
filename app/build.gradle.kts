@@ -99,12 +99,15 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:designsystem"))
     implementation(project(":feature:dashboard"))
+    implementation(project(":feature:transactions"))
     implementation(project(":platform:device"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.androidx.navigation.compose)
 
     testImplementation(libs.junit4)
 

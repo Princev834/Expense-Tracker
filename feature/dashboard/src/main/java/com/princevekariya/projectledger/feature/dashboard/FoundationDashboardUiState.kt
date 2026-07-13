@@ -2,31 +2,34 @@ package com.princevekariya.projectledger.feature.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import com.princevekariya.projectledger.core.designsystem.theme.LedgerElevation
-import com.princevekariya.projectledger.core.designsystem.theme.ProjectLedgerTheme
-import com.princevekariya.projectledger.core.designsystem.theme.ledgerColors
+import com.princevekariya.projectledger.core.designsystem.component.LedgerAmountField
+import com.princevekariya.projectledger.core.designsystem.component.LedgerEmptyState
+import com.princevekariya.projectledger.core.designsystem.component.LedgerLoadingState
+import com.princevekariya.projectledger.core.designsystem.component.LedgerMetricCard
+import com.princevekariya.projectledger.core.designsystem.component.LedgerMetricTone
+import com.princevekariya.projectledger.core.designsystem.component.LedgerPrimaryButton
+import com.princevekariya.projectledger.core.designsystem.component.LedgerSecondaryButton
+import com.princevekariya.projectledger.core.designsystem.component.LedgerSurfaceCard
+import com.princevekariya.projectledger.core.designsystem.component.LedgerTextField
+import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionDirection
+import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionRow
 import com.princevekariya.projectledger.core.designsystem.theme.ledgerSpacing
-import com.princevekariya.projectledger.core.model.AppDistribution
 import com.princevekariya.projectledger.core.model.AppVariantConfiguration
 
 data class FoundationDashboardUiState(
@@ -38,30 +41,41 @@ data class FoundationDashboardUiState(
 @Composable
 fun FoundationDashboard(state: FoundationDashboardUiState, modifier: Modifier = Modifier) {
     val spacing = MaterialTheme.ledgerSpacing
+    var description by remember { mutableStateOf("Lunch at college") }
+    var amount by remember { mutableStateOf("120") }
 
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
             .padding(
                 horizontal = spacing.screenHorizontal,
                 vertical = spacing.screenVertical,
             ),
-        contentAlignment = Alignment.Center,
+        verticalArrangement = Arrangement.spacedBy(spacing.large),
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(spacing.large),
-        ) {
-            DashboardHeader()
-            FoundationDetailsCard(state = state)
-            SemanticTokenRow()
-        }
+        DashboardHeader(state = state)
+        MetricSection()
+        ActionSection()
+        InputSection(
+            description = description,
+            onDescriptionChange = { description = it },
+            amount = amount,
+            onAmountChange = { amount = it },
+        )
+        TransactionSection()
+        StateSection()
+        Text(
+            text = "Phase 10 - navigation shell foundation",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary,
+        )
     }
 }
 
 @Composable
-private fun DashboardHeader() {
+private fun DashboardHeader(state: FoundationDashboardUiState) {
     val spacing = MaterialTheme.ledgerSpacing
 
     Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
@@ -71,142 +85,134 @@ private fun DashboardHeader() {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "A consistent dark finance design system is now active.",
+            text = "The reusable component gallery is now hosted inside the app navigation shell.",
             style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = "${state.variant.displayName} - ${state.platformDescription} - ${state.moduleCount} modules",
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
-private fun FoundationDetailsCard(state: FoundationDashboardUiState) {
+private fun MetricSection() {
     val spacing = MaterialTheme.ledgerSpacing
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = LedgerElevation.card,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(spacing.section),
-            verticalArrangement = Arrangement.spacedBy(spacing.small),
-        ) {
-            Text(
-                text = "Design-token foundation configured successfully.",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            FoundationLine(label = "Edition", value = state.variant.displayName)
-            FoundationLine(label = "Platform", value = state.platformDescription)
-            FoundationLine(label = "Gradle modules", value = state.moduleCount.toString())
-            FoundationLine(
-                label = "SMS capability",
-                value = if (state.variant.supportsSmsAutomation) {
-                    "Personal build boundary available"
-                } else {
-                    "Excluded from Play build"
-                },
-            )
-            Spacer(modifier = Modifier.height(spacing.extraSmall))
-            Text(
-                text = "Phase 8 • design-token foundation",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-        }
-    }
-}
-
-@Composable
-private fun FoundationLine(label: String, value: String) {
-    Text(
-        text = "$label: $value",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-@Composable
-private fun SemanticTokenRow() {
-    val spacing = MaterialTheme.ledgerSpacing
-    val colors = MaterialTheme.ledgerColors
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
     ) {
-        SemanticToken(
-            label = "Income",
-            color = colors.income,
+        LedgerMetricCard(
+            title = "Income",
+            value = "INR 12,500",
+            supportingText = "This month",
+            tone = LedgerMetricTone.INCOME,
             modifier = Modifier.weight(1f),
         )
-        SemanticToken(
-            label = "Expense",
-            color = colors.expense,
-            modifier = Modifier.weight(1f),
-        )
-        SemanticToken(
-            label = "Warning",
-            color = colors.warning,
+        LedgerMetricCard(
+            title = "Expenses",
+            value = "INR 7,240",
+            supportingText = "This month",
+            tone = LedgerMetricTone.EXPENSE,
             modifier = Modifier.weight(1f),
         )
     }
 }
 
 @Composable
-private fun SemanticToken(label: String, color: Color, modifier: Modifier = Modifier) {
+private fun ActionSection() {
     val spacing = MaterialTheme.ledgerSpacing
 
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = spacing.medium,
-                vertical = spacing.small,
-            ),
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(spacing.small)
-                    .background(color = color, shape = CircleShape),
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-            )
-        }
+    LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
+        SectionTitle(title = "Actions")
+        LedgerPrimaryButton(
+            label = "Add expense",
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(),
+        )
+        LedgerSecondaryButton(
+            label = "Add income",
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = "Button spacing: ${spacing.medium}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF080C11)
 @Composable
-@Suppress("UnusedPrivateMember")
-private fun FoundationDashboardPreview() {
-    ProjectLedgerTheme {
-        FoundationDashboard(
-            state = FoundationDashboardUiState(
-                variant = AppVariantConfiguration(
-                    distribution = AppDistribution.PERSONAL,
-                    displayName = "Personal APK",
-                    supportsSmsAutomation = true,
-                    isPlayStoreSafe = false,
-                ),
-                platformDescription = "Android 14 (API 34)",
-                moduleCount = 8,
-            ),
+private fun InputSection(
+    description: String,
+    onDescriptionChange: (String) -> Unit,
+    amount: String,
+    onAmountChange: (String) -> Unit,
+) {
+    LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
+        SectionTitle(title = "Entry fields")
+        LedgerTextField(
+            value = description,
+            onValueChange = onDescriptionChange,
+            label = "Description",
+            placeholder = "What did you spend on?",
+            modifier = Modifier.fillMaxWidth(),
+        )
+        LedgerAmountField(
+            value = amount,
+            onValueChange = onAmountChange,
+            label = "Amount",
+            modifier = Modifier.fillMaxWidth(),
         )
     }
+}
+
+@Composable
+private fun TransactionSection() {
+    LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
+        SectionTitle(title = "Recent activity")
+        LedgerTransactionRow(
+            title = "College canteen",
+            subtitle = "Food and Dining - Today",
+            amount = "- INR 120",
+            direction = LedgerTransactionDirection.EXPENSE,
+        )
+        LedgerTransactionRow(
+            title = "Pocket money",
+            subtitle = "Income - Yesterday",
+            amount = "+ INR 5,000",
+            direction = LedgerTransactionDirection.INCOME,
+        )
+        LedgerTransactionRow(
+            title = "Cash withdrawal",
+            subtitle = "Bank to Cash - 10 Jul",
+            amount = "INR 1,000",
+            direction = LedgerTransactionDirection.TRANSFER,
+        )
+    }
+}
+
+@Composable
+private fun StateSection() {
+    LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
+        SectionTitle(title = "Reusable states")
+        LedgerEmptyState(
+            title = "No pending reviews",
+            message = "Detected transactions that need confirmation will appear here.",
+        )
+        LedgerLoadingState(message = "Preparing monthly summary")
+    }
+}
+
+@Composable
+private fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+    )
 }
