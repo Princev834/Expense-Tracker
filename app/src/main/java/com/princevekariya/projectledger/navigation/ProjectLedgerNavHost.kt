@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
+import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.feature.dashboard.DashboardRoute
 import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.feature.transactions.TransactionsPlaceholderScreen
@@ -16,6 +17,7 @@ import com.princevekariya.projectledger.feature.transactions.TransactionsPlaceho
 internal fun ProjectLedgerNavHost(
     navController: NavHostController,
     dashboardInitialState: DashboardUiState,
+    appLogger: AppLogger,
     contentPadding: PaddingValues,
 ) {
     NavHost(
@@ -31,7 +33,10 @@ internal fun ProjectLedgerNavHost(
                 },
             ),
         ) {
-            DashboardRoute(initialState = dashboardInitialState)
+            DashboardRoute(
+                initialState = dashboardInitialState,
+                appLogger = appLogger,
+            )
         }
 
         composable(

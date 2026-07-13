@@ -6,10 +6,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 
 @Composable
-fun ProjectLedgerApp(dashboardInitialState: DashboardUiState, modifier: Modifier = Modifier) {
+fun ProjectLedgerApp(dashboardInitialState: DashboardUiState, appLogger: AppLogger, modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -22,6 +23,7 @@ fun ProjectLedgerApp(dashboardInitialState: DashboardUiState, modifier: Modifier
         ProjectLedgerNavHost(
             navController = navController,
             dashboardInitialState = dashboardInitialState,
+            appLogger = appLogger,
             contentPadding = contentPadding,
         )
     }

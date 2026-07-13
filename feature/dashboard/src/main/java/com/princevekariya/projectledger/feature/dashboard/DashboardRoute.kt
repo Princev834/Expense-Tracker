@@ -14,12 +14,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.core.designsystem.theme.ledgerSpacing
 
 @Composable
-fun DashboardRoute(initialState: DashboardUiState, modifier: Modifier = Modifier) {
-    val factory = remember(initialState) {
-        DashboardViewModelFactory(initialState = initialState)
+fun DashboardRoute(initialState: DashboardUiState, appLogger: AppLogger, modifier: Modifier = Modifier) {
+    val factory = remember(initialState, appLogger) {
+        DashboardViewModelFactory(
+            initialState = initialState,
+            appLogger = appLogger,
+        )
     }
     val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
     val state by dashboardViewModel.uiState.collectAsStateWithLifecycle()

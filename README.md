@@ -18,6 +18,7 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 9: Reusable Compose components — complete
 - Phase 10: Navigation shell — complete
 - Phase 11: Application state architecture — complete
+- Phase 12: Logging and error handling — complete
 
 ## Development baseline
 
@@ -77,3 +78,7 @@ Do not commit local SDK paths, signing keys, environment files, service credenti
 - Shared buttons, cards, fields, transaction rows, and screen states are available to every feature module.
 - A four-destination bottom navigation shell now connects Home, Transactions, Reports, and Settings.
 - Lifecycle-aware ViewModels, immutable UI state, actions, loading states, and one-off messages now follow one convention.
+
+## Phase 12
+
+Privacy-aware logging, process-level failure reporting, safe error mapping, and validated dashboard drafts are active.
