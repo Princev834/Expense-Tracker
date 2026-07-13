@@ -45,7 +45,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
         verticalArrangement = Arrangement.spacedBy(spacing.large),
     ) {
         DashboardHeader(state = state)
-        MetricSection()
+        MetricSection(state = state)
         ActionSection(
             onAddExpense = {
                 onAction(DashboardAction.AddExpenseClicked)
@@ -72,7 +72,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
             },
         )
         Text(
-            text = "Phase 12 - logging and error-handling foundation",
+            text = "Phase 14 - Room database foundation",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -103,7 +103,7 @@ private fun DashboardHeader(state: DashboardUiState) {
 }
 
 @Composable
-private fun MetricSection() {
+private fun MetricSection(state: DashboardUiState) {
     val spacing = MaterialTheme.ledgerSpacing
 
     Row(
@@ -112,14 +112,14 @@ private fun MetricSection() {
     ) {
         LedgerMetricCard(
             title = "Income",
-            value = "INR 12,500",
+            value = state.incomeThisMonth.formatted(),
             supportingText = "This month",
             tone = LedgerMetricTone.INCOME,
             modifier = Modifier.weight(1f),
         )
         LedgerMetricCard(
             title = "Expenses",
-            value = "INR 7,240",
+            value = state.expensesThisMonth.formatted(),
             supportingText = "This month",
             tone = LedgerMetricTone.EXPENSE,
             modifier = Modifier.weight(1f),

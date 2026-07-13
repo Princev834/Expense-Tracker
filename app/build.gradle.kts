@@ -99,6 +99,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:model"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:database"))
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:transactions"))
     implementation(project(":platform:device"))

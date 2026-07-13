@@ -1,10 +1,10 @@
 @file:Suppress("PackageDirectoryMismatch")
 
 /**
- * Pure Kotlin transaction rules and use cases will live in this package.
+ * Pure Kotlin transaction rules and use cases live in this package.
  *
- * The module intentionally contains no Android dependency. Financial models and
- * executable use cases are introduced in their dedicated later phases.
+ * Core financial entities are now available from core:model. Executable
+ * transaction use cases are introduced in the following domain phases.
  */
 
 package com.princevekariya.projectledger.domain.transactions

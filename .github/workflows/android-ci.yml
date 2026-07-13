@@ -51,6 +51,8 @@ jobs:
             qualityCheck \
             :core:common:test \
             :core:model:test \
+            :core:database:testDebugUnitTest \
+            :core:database:assembleDebug \
             :domain:transactions:test \
             :feature:dashboard:testDebugUnitTest \
             :app:testPersonalDebugUnitTest \

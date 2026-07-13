@@ -6,6 +6,7 @@ import com.princevekariya.projectledger.core.common.UiLoadState
 import com.princevekariya.projectledger.core.common.UiMessage
 import com.princevekariya.projectledger.core.common.info
 import com.princevekariya.projectledger.core.common.warning
+import com.princevekariya.projectledger.core.model.Money
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,8 +50,8 @@ class DashboardViewModel(
             return
         }
 
-        val amount = state.amount.toBigDecimalOrNull()
-        if (amount == null || amount.signum() <= 0) {
+        val amount = Money.parseMajorUnits(state.amount).getOrNull()
+        if (amount == null || !amount.isPositive) {
             appLogger.warning(
                 event = "transaction_draft_rejected",
                 message = "A transaction draft contained an invalid amount.",

@@ -39,6 +39,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
-        const val PROJECT_MODULE_COUNT: Int = 8
+        const val PROJECT_MODULE_COUNT: Int = 9
     }
 }

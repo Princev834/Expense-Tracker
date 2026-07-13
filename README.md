@@ -19,6 +19,8 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 10: Navigation shell — complete
 - Phase 11: Application state architecture — complete
 - Phase 12: Logging and error handling — complete
+- Phase 13: Core financial models — complete
+- Phase 14: Room database foundation — complete
 
 ## Development baseline
 
@@ -71,7 +73,7 @@ Do not commit local SDK paths, signing keys, environment files, service credenti
 ## Foundation checkpoints
 
 - Product flavors separate the directly installed personal APK from the future Play Store-safe build.
-- Eight Gradle modules establish explicit `core`, `domain`, `feature`, and `platform` boundaries.
+- Nine Gradle modules establish explicit `core`, `domain`, `feature`, and `platform` boundaries.
 - Spotless, ktlint, detekt, compiler-warning enforcement, and a pre-commit hook protect the codebase.
 - GitHub Actions runs quality checks, unit tests, and both debug builds on pushes and pull requests.
 - The design system now provides centralized colors, typography, shapes, spacing, elevation, and motion tokens.
@@ -79,6 +81,10 @@ Do not commit local SDK paths, signing keys, environment files, service credenti
 - A four-destination bottom navigation shell now connects Home, Transactions, Reports, and Settings.
 - Lifecycle-aware ViewModels, immutable UI state, actions, loading states, and one-off messages now follow one convention.
 
-## Phase 12
+## Phase 13
 
-Privacy-aware logging, process-level failure reporting, safe error mapping, and validated dashboard drafts are active.
+Exact Money values, transactions, accounts, categories, merchants, payment methods, and budget models are active.
+
+## Phase 14
+
+Room now provides the versioned local database, normalized entities, compile-time checked DAOs, schema export, and model mappers.

@@ -21,6 +21,7 @@ include(":app")
 include(":core:common")
 include(":core:model")
 include(":core:designsystem")
+include(":core:database")
 
 include(":domain:transactions")
 

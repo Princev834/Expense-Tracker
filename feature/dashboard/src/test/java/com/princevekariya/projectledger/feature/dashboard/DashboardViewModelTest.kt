@@ -76,6 +76,21 @@ class DashboardViewModelTest {
     }
 
     @Test
+    fun `amount with more than two decimal places is rejected`() {
+        val logger = RecordingAppLogger()
+        val viewModel = createViewModel(logger = logger)
+        viewModel.onAction(DashboardAction.AmountChanged(value = "10.999"))
+
+        viewModel.onAction(DashboardAction.AddExpenseClicked)
+
+        assertEquals(
+            "Enter a valid amount greater than zero.",
+            viewModel.uiState.value.userMessage?.text,
+        )
+        assertEquals(AppLogLevel.WARNING, logger.entries.single().level)
+    }
+
+    @Test
     fun `only the matching message identifier is consumed`() {
         val viewModel = createViewModel()
         viewModel.onAction(DashboardAction.AddIncomeClicked)
