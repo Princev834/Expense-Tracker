@@ -25,7 +25,7 @@ import org.junit.Test
 
 class SaveManualTransactionUseCaseTest {
     @Test
-    fun savesAValidatedExpenseWithNormalizedValues() = runBlocking {
+    fun savesExpenseAndUpdatedAccountTogether() = runBlocking {
         val fixture = Fixture()
         val useCase = fixture.createUseCase(
             generatedIds = mutableListOf("transaction-one"),
@@ -43,6 +43,7 @@ class SaveManualTransactionUseCaseTest {
             ),
         )
 
+        val atomicWrite = fixture.transactions.atomicWrites.single()
         assertEquals("transaction-one", saved.id)
         assertEquals("account-cash", saved.accountId)
         assertEquals("category-food", saved.categoryId)
@@ -50,7 +51,43 @@ class SaveManualTransactionUseCaseTest {
         assertEquals("Dinner", saved.note)
         assertEquals(TransactionSource.MANUAL, saved.source)
         assertEquals(FIXED_TIME, saved.occurredAtEpochMillis)
-        assertEquals(saved, fixture.transactions.saved.single())
+        assertEquals(saved, atomicWrite.transaction)
+        assertEquals(
+            37_950L,
+            atomicWrite.updatedAccount.currentBalance.minorUnits,
+        )
+        assertEquals(
+            50_000L,
+            atomicWrite.updatedAccount.openingBalance.minorUnits,
+        )
+    }
+
+    @Test
+    fun incomeIncreasesTheAccountBalance() = runBlocking {
+        val fixture = Fixture()
+        val useCase = fixture.createUseCase(
+            generatedIds = mutableListOf("transaction-income"),
+        )
+
+        useCase(
+            draft = ManualTransactionDraft(
+                type = TransactionType.INCOME,
+                amount = Money(minorUnits = 20_000L),
+                accountId = "account-cash",
+                categoryId = "category-salary",
+                paymentMethod = PaymentMethod.BANK_TRANSFER,
+            ),
+        )
+
+        assertEquals(
+            70_000L,
+            fixture.transactions
+                .atomicWrites
+                .single()
+                .updatedAccount
+                .currentBalance
+                .minorUnits,
+        )
     }
 
     @Test
@@ -84,7 +121,7 @@ class SaveManualTransactionUseCaseTest {
         assertTrue(
             failure?.message.orEmpty().contains("does not match"),
         )
-        assertTrue(fixture.transactions.saved.isEmpty())
+        assertTrue(fixture.transactions.atomicWrites.isEmpty())
     }
 
     @Test
@@ -115,20 +152,24 @@ class SaveManualTransactionUseCaseTest {
             generatedIds = mutableListOf("transaction-five"),
         )
         val archivedFailure = runCatching {
-            archivedUseCase(draft = archivedFixture.expenseDraft())
+            archivedUseCase(
+                draft = archivedFixture.expenseDraft(),
+            )
         }.exceptionOrNull()
 
         assertTrue(missingFailure is IllegalArgumentException)
         assertTrue(archivedFailure is IllegalArgumentException)
-        assertTrue(missingFixture.transactions.saved.isEmpty())
-        assertTrue(archivedFixture.transactions.saved.isEmpty())
+        assertTrue(missingFixture.transactions.atomicWrites.isEmpty())
+        assertTrue(archivedFixture.transactions.atomicWrites.isEmpty())
     }
 
     @Test
     fun generatedIdentifierCollisionIsRetried() = runBlocking {
         val fixture = Fixture()
-        fixture.transactions.saved += fixture.existingTransaction(
-            id = "duplicate-id",
+        fixture.transactions.seed(
+            transaction = fixture.existingTransaction(
+                id = "duplicate-id",
+            ),
         )
         val useCase = fixture.createUseCase(
             generatedIds = mutableListOf(
@@ -162,7 +203,8 @@ class SaveManualTransactionUseCaseTest {
     private class Fixture(
         accounts: List<FinancialAccount> = defaultAccounts(),
     ) {
-        private val accountRepository = FakeAccountRepository(accounts)
+        private val accountRepository =
+            FakeAccountRepository(accounts = accounts)
         private val categoryRepository = FakeCategoryRepository(
             categories = defaultCategories(),
         )
@@ -214,7 +256,9 @@ class SaveManualTransactionUseCaseTest {
     private class FakeAccountRepository(
         accounts: List<FinancialAccount>,
     ) : AccountRepository {
-        private val records = accounts.associateBy { account -> account.id }
+        private val records = accounts.associateBy { account ->
+            account.id
+        }
 
         override fun observeAll(): Flow<List<FinancialAccount>> = MutableStateFlow(records.values.toList())
 
@@ -228,7 +272,9 @@ class SaveManualTransactionUseCaseTest {
     private class FakeCategoryRepository(
         categories: List<TransactionCategory>,
     ) : CategoryRepository {
-        private val records = categories.associateBy { category -> category.id }
+        private val records = categories.associateBy { category ->
+            category.id
+        }
         private val state = MutableStateFlow(records.values.toList())
 
         override fun observeActive(type: CategoryType): Flow<List<TransactionCategory>> = state.map { categories ->
@@ -260,23 +306,47 @@ class SaveManualTransactionUseCaseTest {
         }
     }
 
-    private class RecordingTransactionRepository : TransactionRepository {
+    private class RecordingTransactionRepository :
+        TransactionRepository {
         val saved = mutableListOf<LedgerTransaction>()
+        val atomicWrites = mutableListOf<AtomicWrite>()
 
         override fun observeAll(): Flow<List<LedgerTransaction>> = MutableStateFlow(saved)
 
         override fun observeRecent(limit: Int): Flow<List<LedgerTransaction>> = MutableStateFlow(saved.take(limit))
 
-        override suspend fun findById(id: String): LedgerTransaction? =
-            saved.firstOrNull { transaction -> transaction.id == id }
-
-        override suspend fun save(transaction: LedgerTransaction) {
-            saved.removeAll { item -> item.id == transaction.id }
-            saved += transaction
+        override suspend fun findById(id: String): LedgerTransaction? = saved.firstOrNull { transaction ->
+            transaction.id == id
         }
 
-        override suspend fun deleteById(id: String): Boolean = saved.removeAll { transaction -> transaction.id == id }
+        override suspend fun save(transaction: LedgerTransaction) {
+            seed(transaction = transaction)
+        }
+
+        override suspend fun saveWithUpdatedAccount(transaction: LedgerTransaction, updatedAccount: FinancialAccount) {
+            seed(transaction = transaction)
+            atomicWrites += AtomicWrite(
+                transaction = transaction,
+                updatedAccount = updatedAccount,
+            )
+        }
+
+        override suspend fun deleteById(id: String): Boolean = saved.removeAll { transaction ->
+            transaction.id == id
+        }
+
+        fun seed(transaction: LedgerTransaction) {
+            saved.removeAll { item ->
+                item.id == transaction.id
+            }
+            saved += transaction
+        }
     }
+
+    private data class AtomicWrite(
+        val transaction: LedgerTransaction,
+        val updatedAccount: FinancialAccount,
+    )
 
     private companion object {
         const val FIXED_TIME: Long = 10_000L
@@ -286,6 +356,8 @@ class SaveManualTransactionUseCaseTest {
                 id = "account-cash",
                 name = "Cash",
                 type = AccountType.CASH,
+                openingBalance = Money(minorUnits = 50_000L),
+                currentBalance = Money(minorUnits = 50_000L),
             ),
         )
 

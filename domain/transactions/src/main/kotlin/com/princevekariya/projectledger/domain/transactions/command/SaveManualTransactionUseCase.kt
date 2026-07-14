@@ -4,6 +4,7 @@ import com.princevekariya.projectledger.core.model.CategoryType
 import com.princevekariya.projectledger.core.model.LedgerTransaction
 import com.princevekariya.projectledger.core.model.TransactionSource
 import com.princevekariya.projectledger.core.model.TransactionType
+import com.princevekariya.projectledger.domain.transactions.balance.AccountBalanceProjector
 import com.princevekariya.projectledger.domain.transactions.repository.AccountRepository
 import com.princevekariya.projectledger.domain.transactions.repository.CategoryRepository
 import com.princevekariya.projectledger.domain.transactions.repository.MerchantRepository
@@ -16,6 +17,8 @@ class SaveManualTransactionUseCase(
     private val transactionRepository: TransactionRepository,
     private val idGenerator: TransactionIdGenerator,
     private val timeProvider: EpochTimeProvider,
+    private val balanceProjector: AccountBalanceProjector =
+        AccountBalanceProjector(),
 ) {
     suspend operator fun invoke(draft: ManualTransactionDraft): LedgerTransaction {
         val account = requireAccount(draft = draft)
@@ -48,8 +51,16 @@ class SaveManualTransactionUseCase(
             createdAtEpochMillis = now,
             updatedAtEpochMillis = now,
         )
+        val updatedAccount = balanceProjector.project(
+            account = account,
+            transactionType = transaction.type,
+            amount = transaction.amount,
+        )
 
-        transactionRepository.save(transaction = transaction)
+        transactionRepository.saveWithUpdatedAccount(
+            transaction = transaction,
+            updatedAccount = updatedAccount,
+        )
         return transaction
     }
 
@@ -74,9 +85,12 @@ class SaveManualTransactionUseCase(
     }
 
     private suspend fun requireMerchant(draft: ManualTransactionDraft): String? {
-        val merchantSearchKey = draft.normalizedMerchantSearchKey ?: return null
+        val merchantSearchKey =
+            draft.normalizedMerchantSearchKey ?: return null
         val merchant = requireNotNull(
-            merchantRepository.findBySearchKey(searchKey = merchantSearchKey),
+            merchantRepository.findBySearchKey(
+                searchKey = merchantSearchKey,
+            ),
         ) {
             "The selected merchant does not exist."
         }

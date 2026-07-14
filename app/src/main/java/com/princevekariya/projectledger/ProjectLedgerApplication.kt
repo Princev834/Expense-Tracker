@@ -71,6 +71,10 @@ class ProjectLedgerApplication : Application() {
             message = "Manual expense and income saving is ready.",
         )
         appLogger.info(
+            event = "balance_aware_transaction_writer_ready",
+            message = "Transactions and account balances will be stored atomically.",
+        )
+        appLogger.info(
             event = "transaction_entry_state_ready",
             message = "Transaction entry state and ViewModel factory are ready.",
         )

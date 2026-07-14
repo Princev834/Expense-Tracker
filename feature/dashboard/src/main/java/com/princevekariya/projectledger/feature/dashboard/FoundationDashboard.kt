@@ -62,7 +62,7 @@ fun FoundationDashboard(
             },
         )
         Text(
-            text = "Phase 20 - real transaction entry screen",
+            text = "Phase 21 - atomic account balance updates",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )

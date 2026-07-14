@@ -286,6 +286,10 @@ class TransactionEntryViewModelTest {
             saved += transaction
         }
 
+        override suspend fun saveWithUpdatedAccount(transaction: LedgerTransaction, updatedAccount: FinancialAccount) {
+            saved += transaction
+        }
+
         override suspend fun deleteById(id: String): Boolean = saved.removeAll { transaction ->
             transaction.id == id
         }
