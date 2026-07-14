@@ -2,6 +2,7 @@ package com.princevekariya.projectledger.di
 
 import com.princevekariya.projectledger.core.common.NoOpAppLogger
 import com.princevekariya.projectledger.core.database.repository.LedgerRepositories
+import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.repository.AccountRepository
 import com.princevekariya.projectledger.domain.transactions.repository.BudgetRepository
 import com.princevekariya.projectledger.domain.transactions.repository.CategoryRepository
@@ -13,21 +14,29 @@ import org.junit.Test
 
 class DefaultAppContainerTest {
     @Test
-    fun containerReturnsTheDependenciesProvidedByTheCompositionRoot() {
+    fun containerReturnsEveryDependencyProvidedByTheCompositionRoot() {
+        val accounts = unusedProxy<AccountRepository>()
+        val categories = unusedProxy<CategoryRepository>()
         val repositories = LedgerRepositories(
-            accounts = unusedProxy<AccountRepository>(),
+            accounts = accounts,
             budgets = unusedProxy<BudgetRepository>(),
-            categories = unusedProxy<CategoryRepository>(),
+            categories = categories,
             merchants = unusedProxy<MerchantRepository>(),
             transactions = unusedProxy<TransactionRepository>(),
+        )
+        val initializer = EnsureDefaultLedgerDataUseCase(
+            accountRepository = accounts,
+            categoryRepository = categories,
         )
         val container = DefaultAppContainer(
             appLogger = NoOpAppLogger,
             repositories = repositories,
+            ensureDefaultLedgerData = initializer,
         )
 
         assertSame(NoOpAppLogger, container.appLogger)
         assertSame(repositories, container.repositories)
+        assertSame(initializer, container.ensureDefaultLedgerData)
     }
 
     @Suppress("UNCHECKED_CAST")

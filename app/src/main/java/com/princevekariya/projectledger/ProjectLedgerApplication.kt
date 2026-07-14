@@ -1,15 +1,25 @@
 package com.princevekariya.projectledger
 
 import android.app.Application
+import com.princevekariya.projectledger.core.common.error
 import com.princevekariya.projectledger.core.common.info
 import com.princevekariya.projectledger.core.database.ProjectLedgerDatabase
 import com.princevekariya.projectledger.core.database.repository.createRepositories
 import com.princevekariya.projectledger.di.AppContainer
 import com.princevekariya.projectledger.di.DefaultAppContainer
+import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.platform.device.AndroidAppLogger
 import com.princevekariya.projectledger.platform.device.AndroidProcessErrorReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class ProjectLedgerApplication : Application() {
+    private val applicationScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.IO,
+    )
+
     lateinit var appContainer: AppContainer
         private set
 
@@ -23,14 +33,42 @@ class ProjectLedgerApplication : Application() {
         AndroidProcessErrorReporter(logger = appLogger).install()
 
         val database = ProjectLedgerDatabase.create(context = this)
+        val repositories = database.createRepositories()
         appContainer = DefaultAppContainer(
             appLogger = appLogger,
-            repositories = database.createRepositories(),
+            repositories = repositories,
+            ensureDefaultLedgerData = EnsureDefaultLedgerDataUseCase(
+                accountRepository = repositories.accounts,
+                categoryRepository = repositories.categories,
+            ),
         )
 
         appLogger.info(
             event = "application_container_ready",
             message = "Logging and five local repositories are ready.",
         )
+        initializeDefaultLedgerData()
+    }
+
+    private fun initializeDefaultLedgerData() {
+        val appLogger = appContainer.appLogger
+        val initializer = appContainer.ensureDefaultLedgerData
+
+        applicationScope.launch {
+            runCatching {
+                initializer()
+            }.onSuccess { result ->
+                appLogger.info(
+                    event = "default_ledger_data_ready",
+                    message = "Created ${result.createdItems} missing default records.",
+                )
+            }.onFailure { throwable ->
+                appLogger.error(
+                    event = "default_ledger_data_failed",
+                    message = "Unable to prepare default ledger records.",
+                    throwable = throwable,
+                )
+            }
+        }
     }
 }

@@ -100,6 +100,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:database"))
+    implementation(project(":domain:transactions"))
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:transactions"))
     implementation(project(":platform:device"))
@@ -110,6 +111,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit4)
 

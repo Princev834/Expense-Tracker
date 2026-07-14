@@ -55,23 +55,26 @@ function Invoke-CheckedCommand {
     }
 }
 
-Write-Step "Checking Phase 16 application-container contracts"
+Write-Step "Checking Phase 17 bootstrap contracts"
 
 $appRoot = ".\app\src\main\java\com\princevekariya\projectledger"
-$appTestRoot = ".\app\src\test\java\com\princevekariya\projectledger"
-$databaseRoot = `
-    ".\core\database\src\main\kotlin\com\princevekariya\projectledger\core\database"
+$domainRoot = `
+    ".\domain\transactions\src\main\kotlin\com\princevekariya\projectledger\domain\transactions"
+$domainTestRoot = `
+    ".\domain\transactions\src\test\kotlin\com\princevekariya\projectledger\domain\transactions"
 $dashboardFile = `
     ".\feature\dashboard\src\main\java\com\princevekariya\projectledger\feature\dashboard\FoundationDashboard.kt"
 
 $requiredFiles = @(
+    "$domainRoot\bootstrap\DefaultLedgerData.kt",
+    "$domainRoot\bootstrap\DefaultLedgerDataResult.kt",
+    "$domainRoot\bootstrap\EnsureDefaultLedgerDataUseCase.kt",
+    "$domainTestRoot\bootstrap\EnsureDefaultLedgerDataUseCaseTest.kt",
     "$appRoot\di\AppContainer.kt",
     "$appRoot\di\DefaultAppContainer.kt",
     "$appRoot\ProjectLedgerApplication.kt",
-    "$appRoot\MainActivity.kt",
-    "$appTestRoot\di\DefaultAppContainerTest.kt",
-    ".\docs\PHASE-16-APPLICATION-CONTAINER.md",
-    ".\scripts\Verify-Phase16.ps1"
+    ".\docs\PHASE-17-DEFAULT-LEDGER-BOOTSTRAP.md",
+    ".\scripts\Verify-Phase17.ps1"
 )
 
 foreach ($requiredFile in $requiredFiles) {
@@ -79,49 +82,47 @@ foreach ($requiredFile in $requiredFiles) {
 }
 
 Assert-FileContains `
-    -Path "$appRoot\di\AppContainer.kt" `
-    -ExpectedText "val appLogger: AppLogger"
-Assert-FileContains `
-    -Path "$appRoot\di\AppContainer.kt" `
-    -ExpectedText "val repositories: LedgerRepositories"
-Assert-FileContains `
-    -Path "$appRoot\ProjectLedgerApplication.kt" `
-    -ExpectedText "lateinit var appContainer: AppContainer"
-Assert-FileContains `
-    -Path "$appRoot\ProjectLedgerApplication.kt" `
-    -ExpectedText "repositories = database.createRepositories()"
-Assert-FileContains `
-    -Path "$appRoot\ProjectLedgerApplication.kt" `
-    -ExpectedText 'event = "application_container_ready"'
-Assert-FileExcludes `
-    -Path "$appRoot\ProjectLedgerApplication.kt" `
-    -ForbiddenText "lateinit var database"
-Assert-FileExcludes `
-    -Path "$appRoot\ProjectLedgerApplication.kt" `
-    -ForbiddenText "lateinit var appLogger"
-Assert-FileContains `
-    -Path "$appRoot\MainActivity.kt" `
-    -ExpectedText "(application as ProjectLedgerApplication).appContainer"
-Assert-FileContains `
-    -Path "$appRoot\MainActivity.kt" `
-    -ExpectedText "val appLogger = appContainer.appLogger"
-Assert-FileContains `
-    -Path "$databaseRoot\repository\LedgerRepositories.kt" `
-    -ExpectedText "fun ProjectLedgerDatabase.createRepositories()"
-Assert-FileContains `
     -Path ".\core\database\build.gradle.kts" `
-    -ExpectedText 'api(project(":domain:transactions"))'
+    -ExpectedText "api(libs.androidx.room.runtime)"
 Assert-FileContains `
-    -Path ".\core\database\build.gradle.kts" `
-    -ExpectedText 'api(libs.androidx.room.runtime)'
+    -Path ".\app\build.gradle.kts" `
+    -ExpectedText 'implementation(project(":domain:transactions"))'
 Assert-FileContains `
-    -Path ".\gradle\libs.versions.toml" `
-    -ExpectedText 'lifecycle-runtime-ktx = "2.8.2"'
+    -Path ".\app\build.gradle.kts" `
+    -ExpectedText "implementation(libs.kotlinx.coroutines.core)"
+Assert-FileContains `
+    -Path "$domainRoot\bootstrap\DefaultLedgerData.kt" `
+    -ExpectedText 'id = "account-cash"'
+Assert-FileContains `
+    -Path "$domainRoot\bootstrap\DefaultLedgerData.kt" `
+    -ExpectedText 'id = "category-pocket-money"'
+Assert-FileContains `
+    -Path "$domainRoot\bootstrap\DefaultLedgerData.kt" `
+    -ExpectedText "isDefault = true"
+Assert-FileContains `
+    -Path "$domainRoot\bootstrap\EnsureDefaultLedgerDataUseCase.kt" `
+    -ExpectedText "accountRepository.findById"
+Assert-FileContains `
+    -Path "$domainRoot\bootstrap\EnsureDefaultLedgerDataUseCase.kt" `
+    -ExpectedText "categoryRepository.findById"
+Assert-FileContains `
+    -Path "$appRoot\di\AppContainer.kt" `
+    -ExpectedText "val ensureDefaultLedgerData: EnsureDefaultLedgerDataUseCase"
+Assert-FileContains `
+    -Path "$appRoot\ProjectLedgerApplication.kt" `
+    -ExpectedText "SupervisorJob() + Dispatchers.IO"
+Assert-FileContains `
+    -Path "$appRoot\ProjectLedgerApplication.kt" `
+    -ExpectedText 'event = "default_ledger_data_ready"'
+Assert-FileContains `
+    -Path "$appRoot\ProjectLedgerApplication.kt" `
+    -ExpectedText 'event = "default_ledger_data_failed"'
 Assert-FileContains `
     -Path $dashboardFile `
-    -ExpectedText "Phase 16 - application dependency container"
+    -ExpectedText "Phase 17 - default ledger bootstrap"
 
-$databaseFile = "$databaseRoot\ProjectLedgerDatabase.kt"
+$databaseFile = `
+    ".\core\database\src\main\kotlin\com\princevekariya\projectledger\core\database\ProjectLedgerDatabase.kt"
 Assert-FileContains -Path $databaseFile -ExpectedText "DATABASE_VERSION: Int = 1"
 Assert-FileExcludes `
     -Path $databaseFile `
@@ -157,7 +158,7 @@ if ($badWeightImports) {
     throw "An explicit scoped Compose weight import was found."
 }
 
-Write-Host "Phase 16 configuration checks passed." -ForegroundColor Green
+Write-Host "Phase 17 configuration checks passed." -ForegroundColor Green
 
 if ($ConfigurationOnly) {
     exit 0
@@ -190,7 +191,7 @@ Invoke-CheckedCommand -Label "Applying deterministic formatting" -Command {
 }
 
 Invoke-CheckedCommand `
-    -Label "Running quality checks, container tests, repository tests, and debug builds" `
+    -Label "Running quality checks, bootstrap tests, repository tests, and debug builds" `
     -Command {
         .\gradlew.bat `
             qualityCheck `
@@ -242,10 +243,10 @@ if ($InstallOnPhone) {
         & $adb install -r $apk
     }
 
-    Write-Step "Running application-container startup smoke test"
+    Write-Step "Running default-ledger bootstrap smoke test"
     $packageName = "com.princevekariya.projectledger.personal.debug"
     $activityName = "com.princevekariya.projectledger.MainActivity"
-    $failureReport = ".\Phase16-StartupSmokeFailure.txt"
+    $failureReport = ".\Phase17-StartupSmokeFailure.txt"
 
     & $adb logcat -c
     if ($LASTEXITCODE -ne 0) {
@@ -262,45 +263,57 @@ if ($InstallOnPhone) {
         throw "Android could not launch Project Ledger Personal Dev.`n$($launchOutput -join [Environment]::NewLine)"
     }
 
-    Start-Sleep -Seconds 5
+    $processIdText = ""
+    $focusedLogText = ""
+    $hasBootstrapReadyLog = $false
 
-    # PHASE16_FOCUSED_LOGCAT_V2
-    $processIdText = ((& $adb shell pidof $packageName 2>$null) | Out-String).Trim()
-    $focusedLogLines = & $adb logcat `
-        -d `
-        -v threadtime `
-        -s `
-        "ProjectLedger:V" `
-        "AndroidRuntime:E" `
-        "*:S"
-    $focusedLogText = $focusedLogLines -join [Environment]::NewLine
+    for ($attempt = 1; $attempt -le 15; $attempt += 1) {
+        Start-Sleep -Seconds 1
+        $processIdText = ((& $adb shell pidof $packageName 2>$null) | Out-String).Trim()
+
+        $focusedLogLines = & $adb logcat `
+            -d `
+            -v threadtime `
+            -s `
+            "ProjectLedger:V" `
+            "AndroidRuntime:E" `
+            "*:S"
+        $focusedLogText = $focusedLogLines -join [Environment]::NewLine
+        $hasBootstrapReadyLog =
+            $focusedLogText.Contains("default_ledger_data_ready")
+
+        if (
+            -not [string]::IsNullOrWhiteSpace($processIdText) -and
+            $hasBootstrapReadyLog
+        ) {
+            break
+        }
+    }
 
     $hasFatalException =
         $focusedLogText.Contains("FATAL EXCEPTION") -and
         $focusedLogText.Contains($packageName)
     $hasKnownLifecycleCrash =
         $focusedLogText.Contains("CompositionLocal LocalLifecycleOwner not present")
-    $hasContainerInitializationFailure =
-        $focusedLogText.Contains("UninitializedPropertyAccessException") -and
-        $focusedLogText.Contains("appContainer")
-    $hasContainerReadyLog =
-        $focusedLogText.Contains("application_container_ready")
+    $hasBootstrapFailure =
+        $focusedLogText.Contains("default_ledger_data_failed")
 
     if (
         [string]::IsNullOrWhiteSpace($processIdText) -or
         $hasFatalException -or
         $hasKnownLifecycleCrash -or
-        $hasContainerInitializationFailure -or
-        -not $hasContainerReadyLog
+        $hasBootstrapFailure -or
+        -not $hasBootstrapReadyLog
     ) {
         $diagnosticLogLines = & $adb logcat -d -v threadtime -t 5000
         $diagnosticLogText = $diagnosticLogLines -join [Environment]::NewLine
         $reportLines = @(
-            "Project Ledger Phase 16 startup smoke-test failure",
+            "Project Ledger Phase 17 startup smoke-test failure",
             "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz')",
             "Package: $packageName",
             "Process ID after launch: $processIdText",
-            "Container-ready log found: $hasContainerReadyLog",
+            "Bootstrap-ready log found: $hasBootstrapReadyLog",
+            "Bootstrap failure found: $hasBootstrapFailure",
             "",
             "=== Launch output ===",
             ($launchOutput -join [Environment]::NewLine),
@@ -312,19 +325,19 @@ if ($InstallOnPhone) {
             $diagnosticLogText
         )
         $reportLines | Set-Content -Path $failureReport -Encoding UTF8
-        throw "The app did not pass the Phase 16 startup smoke test. See $failureReport."
+        throw "The app did not pass the Phase 17 startup smoke test. See $failureReport."
     }
 
     Write-Host "Startup smoke test passed. Running PID: $processIdText" -ForegroundColor Green
-    Write-Host "Application container initialization was confirmed in Logcat." -ForegroundColor Green
+    Write-Host "Default ledger data initialization was confirmed in Logcat." -ForegroundColor Green
 }
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
-Write-Host "PHASE 16 VERIFICATION PASSED" -ForegroundColor Green
+Write-Host "PHASE 17 VERIFICATION PASSED" -ForegroundColor Green
 Write-Host "============================================================" -ForegroundColor Green
-Write-Host "Composition root: ProjectLedgerApplication"
-Write-Host "Container: shared logger and five repository dependencies"
-Write-Host "Feature boundary: no DAOs or Room entities exposed"
+Write-Host "First-use data: Cash account and twelve practical categories"
+Write-Host "Safety: repeated launches do not duplicate or overwrite records"
+Write-Host "Execution: background IO coroutine after repository initialization"
 Write-Host "Schema safety: Room version 1 remains unchanged"
 Write-Host "Primary development variant: personalDebug"
