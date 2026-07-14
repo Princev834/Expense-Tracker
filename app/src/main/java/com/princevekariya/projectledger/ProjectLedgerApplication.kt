@@ -7,7 +7,10 @@ import com.princevekariya.projectledger.core.database.ProjectLedgerDatabase
 import com.princevekariya.projectledger.core.database.repository.createRepositories
 import com.princevekariya.projectledger.di.AppContainer
 import com.princevekariya.projectledger.di.DefaultAppContainer
+import com.princevekariya.projectledger.di.SystemEpochTimeProvider
+import com.princevekariya.projectledger.di.UuidTransactionIdGenerator
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
+import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
 import com.princevekariya.projectledger.platform.device.AndroidAppLogger
 import com.princevekariya.projectledger.platform.device.AndroidProcessErrorReporter
 import kotlinx.coroutines.CoroutineScope
@@ -41,11 +44,23 @@ class ProjectLedgerApplication : Application() {
                 accountRepository = repositories.accounts,
                 categoryRepository = repositories.categories,
             ),
+            saveManualTransaction = SaveManualTransactionUseCase(
+                accountRepository = repositories.accounts,
+                categoryRepository = repositories.categories,
+                merchantRepository = repositories.merchants,
+                transactionRepository = repositories.transactions,
+                idGenerator = UuidTransactionIdGenerator,
+                timeProvider = SystemEpochTimeProvider,
+            ),
         )
 
         appLogger.info(
             event = "application_container_ready",
             message = "Logging and five local repositories are ready.",
+        )
+        appLogger.info(
+            event = "manual_transaction_use_case_ready",
+            message = "Manual expense and income saving is ready.",
         )
         initializeDefaultLedgerData()
     }

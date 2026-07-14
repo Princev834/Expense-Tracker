@@ -3,6 +3,9 @@ package com.princevekariya.projectledger.di
 import com.princevekariya.projectledger.core.common.NoOpAppLogger
 import com.princevekariya.projectledger.core.database.repository.LedgerRepositories
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
+import com.princevekariya.projectledger.domain.transactions.command.EpochTimeProvider
+import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
+import com.princevekariya.projectledger.domain.transactions.command.TransactionIdGenerator
 import com.princevekariya.projectledger.domain.transactions.repository.AccountRepository
 import com.princevekariya.projectledger.domain.transactions.repository.BudgetRepository
 import com.princevekariya.projectledger.domain.transactions.repository.CategoryRepository
@@ -17,26 +20,42 @@ class DefaultAppContainerTest {
     fun containerReturnsEveryDependencyProvidedByTheCompositionRoot() {
         val accounts = unusedProxy<AccountRepository>()
         val categories = unusedProxy<CategoryRepository>()
+        val merchants = unusedProxy<MerchantRepository>()
+        val transactions = unusedProxy<TransactionRepository>()
         val repositories = LedgerRepositories(
             accounts = accounts,
             budgets = unusedProxy<BudgetRepository>(),
             categories = categories,
-            merchants = unusedProxy<MerchantRepository>(),
-            transactions = unusedProxy<TransactionRepository>(),
+            merchants = merchants,
+            transactions = transactions,
         )
         val initializer = EnsureDefaultLedgerDataUseCase(
             accountRepository = accounts,
             categoryRepository = categories,
         )
+        val saver = SaveManualTransactionUseCase(
+            accountRepository = accounts,
+            categoryRepository = categories,
+            merchantRepository = merchants,
+            transactionRepository = transactions,
+            idGenerator = TransactionIdGenerator {
+                "unused-id"
+            },
+            timeProvider = EpochTimeProvider {
+                0L
+            },
+        )
         val container = DefaultAppContainer(
             appLogger = NoOpAppLogger,
             repositories = repositories,
             ensureDefaultLedgerData = initializer,
+            saveManualTransaction = saver,
         )
 
         assertSame(NoOpAppLogger, container.appLogger)
         assertSame(repositories, container.repositories)
         assertSame(initializer, container.ensureDefaultLedgerData)
+        assertSame(saver, container.saveManualTransaction)
     }
 
     @Suppress("UNCHECKED_CAST")

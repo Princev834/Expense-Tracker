@@ -72,7 +72,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
             },
         )
         Text(
-            text = "Phase 17 - default ledger bootstrap",
+            text = "Phase 18 - manual transaction command",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )
