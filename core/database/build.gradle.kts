@@ -33,9 +33,11 @@ kapt {
 
 dependencies {
     api(project(":core:model"))
+    api(project(":domain:transactions"))
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.kotlinx.coroutines.core)
     kapt(libs.androidx.room.compiler)
 
     testImplementation(libs.junit4)

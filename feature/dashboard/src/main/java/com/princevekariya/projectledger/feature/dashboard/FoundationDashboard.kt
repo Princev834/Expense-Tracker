@@ -72,7 +72,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
             },
         )
         Text(
-            text = "Phase 14 - Room database foundation",
+            text = "Phase 15 - repository boundary",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )

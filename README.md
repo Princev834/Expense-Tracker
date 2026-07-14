@@ -21,6 +21,7 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 12: Logging and error handling — complete
 - Phase 13: Core financial models — complete
 - Phase 14: Room database foundation — complete
+- Phase 15: Repository contracts and local implementations — complete
 
 ## Development baseline
 
@@ -88,3 +89,7 @@ Exact Money values, transactions, accounts, categories, merchants, payment metho
 ## Phase 14
 
 Room now provides the versioned local database, normalized entities, compile-time checked DAOs, schema export, and model mappers.
+
+## Phase 15
+
+Domain repository contracts now isolate features from Room. The database module provides tested local implementations for accounts, categories, merchants, transactions, and budgets.

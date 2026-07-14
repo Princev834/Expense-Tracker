@@ -1,10 +1,9 @@
 @file:Suppress("PackageDirectoryMismatch")
 
 /**
- * Pure Kotlin transaction rules and use cases live in this package.
+ * Repository contracts and pure transaction rules live in this domain module.
  *
- * Core financial entities are now available from core:model. Executable
- * transaction use cases are introduced in the following domain phases.
+ * Android and Room implementation details remain outside the domain boundary.
  */
 
 package com.princevekariya.projectledger.domain.transactions
