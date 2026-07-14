@@ -72,7 +72,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
             },
         )
         Text(
-            text = "Phase 18 - manual transaction command",
+            text = "Phase 19 - transaction entry state",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )

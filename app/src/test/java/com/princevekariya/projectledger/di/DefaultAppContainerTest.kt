@@ -11,6 +11,7 @@ import com.princevekariya.projectledger.domain.transactions.repository.BudgetRep
 import com.princevekariya.projectledger.domain.transactions.repository.CategoryRepository
 import com.princevekariya.projectledger.domain.transactions.repository.MerchantRepository
 import com.princevekariya.projectledger.domain.transactions.repository.TransactionRepository
+import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import java.lang.reflect.Proxy
 import org.junit.Assert.assertSame
 import org.junit.Test
@@ -45,17 +46,25 @@ class DefaultAppContainerTest {
                 0L
             },
         )
+        val entryFactory = TransactionEntryViewModelFactory(
+            accountRepository = accounts,
+            categoryRepository = categories,
+            saveManualTransaction = saver,
+            appLogger = NoOpAppLogger,
+        )
         val container = DefaultAppContainer(
             appLogger = NoOpAppLogger,
             repositories = repositories,
             ensureDefaultLedgerData = initializer,
             saveManualTransaction = saver,
+            transactionEntryViewModelFactory = entryFactory,
         )
 
         assertSame(NoOpAppLogger, container.appLogger)
         assertSame(repositories, container.repositories)
         assertSame(initializer, container.ensureDefaultLedgerData)
         assertSame(saver, container.saveManualTransaction)
+        assertSame(entryFactory, container.transactionEntryViewModelFactory)
     }
 
     @Suppress("UNCHECKED_CAST")

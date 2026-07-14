@@ -25,6 +25,7 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 16: Application dependency container — complete
 - Phase 17: Default ledger bootstrap — complete
 - Phase 18: Manual transaction command — complete
+- Phase 19: Transaction entry state and ViewModel — complete
 
 ## Development baseline
 
@@ -114,3 +115,9 @@ existing records are preserved and duplicate defaults are not created.
 A tested domain command can now save manual expenses and income through the
 repository boundary. It validates account, category, merchant, currency,
 timestamps, and identifier uniqueness before creating a Room transaction.
+
+## Phase 19
+
+The transactions feature now owns a lifecycle-aware ViewModel and immutable form
+state. It observes active accounts and matching categories, validates the form,
+saves through the Phase 18 command, and exposes one-off user messages.

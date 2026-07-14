@@ -11,6 +11,7 @@ import com.princevekariya.projectledger.di.SystemEpochTimeProvider
 import com.princevekariya.projectledger.di.UuidTransactionIdGenerator
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
+import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.platform.device.AndroidAppLogger
 import com.princevekariya.projectledger.platform.device.AndroidProcessErrorReporter
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +38,14 @@ class ProjectLedgerApplication : Application() {
 
         val database = ProjectLedgerDatabase.create(context = this)
         val repositories = database.createRepositories()
+        val saveManualTransaction = SaveManualTransactionUseCase(
+            accountRepository = repositories.accounts,
+            categoryRepository = repositories.categories,
+            merchantRepository = repositories.merchants,
+            transactionRepository = repositories.transactions,
+            idGenerator = UuidTransactionIdGenerator,
+            timeProvider = SystemEpochTimeProvider,
+        )
         appContainer = DefaultAppContainer(
             appLogger = appLogger,
             repositories = repositories,
@@ -44,13 +53,12 @@ class ProjectLedgerApplication : Application() {
                 accountRepository = repositories.accounts,
                 categoryRepository = repositories.categories,
             ),
-            saveManualTransaction = SaveManualTransactionUseCase(
+            saveManualTransaction = saveManualTransaction,
+            transactionEntryViewModelFactory = TransactionEntryViewModelFactory(
                 accountRepository = repositories.accounts,
                 categoryRepository = repositories.categories,
-                merchantRepository = repositories.merchants,
-                transactionRepository = repositories.transactions,
-                idGenerator = UuidTransactionIdGenerator,
-                timeProvider = SystemEpochTimeProvider,
+                saveManualTransaction = saveManualTransaction,
+                appLogger = appLogger,
             ),
         )
 
@@ -61,6 +69,10 @@ class ProjectLedgerApplication : Application() {
         appLogger.info(
             event = "manual_transaction_use_case_ready",
             message = "Manual expense and income saving is ready.",
+        )
+        appLogger.info(
+            event = "transaction_entry_state_ready",
+            message = "Transaction entry state and ViewModel factory are ready.",
         )
         initializeDefaultLedgerData()
     }

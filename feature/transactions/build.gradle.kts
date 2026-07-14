@@ -30,12 +30,18 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:model"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":domain:transactions"))
+    api(project(":core:common"))
+    api(project(":core:model"))
+    api(project(":domain:transactions"))
+    api(libs.androidx.lifecycle.viewmodel.ktx)
+    api(libs.kotlinx.coroutines.core)
 
+    implementation(project(":core:designsystem"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
