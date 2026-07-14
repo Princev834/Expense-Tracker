@@ -4,23 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.princevekariya.projectledger.config.CurrentAppVariant
-import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.core.common.info
 import com.princevekariya.projectledger.core.designsystem.theme.ProjectLedgerTheme
+import com.princevekariya.projectledger.di.AppContainer
 import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.navigation.ProjectLedgerApp
 import com.princevekariya.projectledger.platform.device.AndroidDeviceInfoProvider
 
 class MainActivity : ComponentActivity() {
-    private val appLogger: AppLogger
-        get() = (application as ProjectLedgerApplication).appLogger
+    private val appContainer: AppContainer
+        get() = (application as ProjectLedgerApplication).appContainer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val appLogger = appContainer.appLogger
         appLogger.info(
             event = "main_activity_created",
-            message = "Main application activity is ready.",
+            message = "Main application activity resolved its dependencies.",
         )
         val deviceInfo = AndroidDeviceInfoProvider().getDeviceInfo()
 

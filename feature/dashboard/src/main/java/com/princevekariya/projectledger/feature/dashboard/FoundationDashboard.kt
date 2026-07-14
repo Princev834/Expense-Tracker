@@ -72,7 +72,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
             },
         )
         Text(
-            text = "Phase 15 - repository boundary",
+            text = "Phase 16 - application dependency container",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )
