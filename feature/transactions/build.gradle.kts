@@ -37,6 +37,8 @@ dependencies {
     api(libs.kotlinx.coroutines.core)
 
     implementation(project(":core:designsystem"))
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
 

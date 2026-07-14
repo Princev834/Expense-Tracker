@@ -33,6 +33,8 @@ class MainActivity : ComponentActivity() {
                         platformDescription = deviceInfo.displayValue,
                         moduleCount = PROJECT_MODULE_COUNT,
                     ),
+                    transactionEntryViewModelFactory =
+                    appContainer.transactionEntryViewModelFactory,
                     appLogger = appLogger,
                 )
             }

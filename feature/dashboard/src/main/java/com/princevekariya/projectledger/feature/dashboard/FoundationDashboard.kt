@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.princevekariya.projectledger.core.common.UiLoadState
-import com.princevekariya.projectledger.core.designsystem.component.LedgerAmountField
 import com.princevekariya.projectledger.core.designsystem.component.LedgerEmptyState
 import com.princevekariya.projectledger.core.designsystem.component.LedgerErrorState
 import com.princevekariya.projectledger.core.designsystem.component.LedgerLoadingState
@@ -24,13 +23,18 @@ import com.princevekariya.projectledger.core.designsystem.component.LedgerMetric
 import com.princevekariya.projectledger.core.designsystem.component.LedgerPrimaryButton
 import com.princevekariya.projectledger.core.designsystem.component.LedgerSecondaryButton
 import com.princevekariya.projectledger.core.designsystem.component.LedgerSurfaceCard
-import com.princevekariya.projectledger.core.designsystem.component.LedgerTextField
 import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionDirection
 import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionRow
 import com.princevekariya.projectledger.core.designsystem.theme.ledgerSpacing
 
 @Composable
-fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> Unit, modifier: Modifier = Modifier) {
+fun FoundationDashboard(
+    state: DashboardUiState,
+    onAction: (DashboardAction) -> Unit,
+    onAddExpense: () -> Unit,
+    onAddIncome: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val spacing = MaterialTheme.ledgerSpacing
 
     Column(
@@ -47,22 +51,8 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
         DashboardHeader(state = state)
         MetricSection(state = state)
         ActionSection(
-            onAddExpense = {
-                onAction(DashboardAction.AddExpenseClicked)
-            },
-            onAddIncome = {
-                onAction(DashboardAction.AddIncomeClicked)
-            },
-        )
-        InputSection(
-            description = state.description,
-            onDescriptionChange = {
-                onAction(DashboardAction.DescriptionChanged(value = it))
-            },
-            amount = state.amount,
-            onAmountChange = {
-                onAction(DashboardAction.AmountChanged(value = it))
-            },
+            onAddExpense = onAddExpense,
+            onAddIncome = onAddIncome,
         )
         TransactionSection()
         StateSection(
@@ -72,7 +62,7 @@ fun FoundationDashboard(state: DashboardUiState, onAction: (DashboardAction) -> 
             },
         )
         Text(
-            text = "Phase 19 - transaction entry state",
+            text = "Phase 20 - real transaction entry screen",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -90,7 +80,7 @@ private fun DashboardHeader(state: DashboardUiState) {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "The dashboard now follows one-way state flow through a lifecycle-aware ViewModel.",
+            text = "Use the quick actions to open the dedicated expense or income form.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -139,31 +129,6 @@ private fun ActionSection(onAddExpense: () -> Unit, onAddIncome: () -> Unit) {
         LedgerSecondaryButton(
             label = "Add income",
             onClick = onAddIncome,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
-@Composable
-private fun InputSection(
-    description: String,
-    onDescriptionChange: (String) -> Unit,
-    amount: String,
-    onAmountChange: (String) -> Unit,
-) {
-    LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle(title = "Entry fields")
-        LedgerTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
-            label = "Description",
-            placeholder = "What did you spend on?",
-            modifier = Modifier.fillMaxWidth(),
-        )
-        LedgerAmountField(
-            value = amount,
-            onValueChange = onAmountChange,
-            label = "Amount",
             modifier = Modifier.fillMaxWidth(),
         )
     }

@@ -15,6 +15,14 @@ class TransactionEntryViewModelFactory(
     private val appLogger: AppLogger,
     private val initialTransactionType: TransactionType = TransactionType.EXPENSE,
 ) : ViewModelProvider.Factory {
+    fun forTransactionType(type: TransactionType): TransactionEntryViewModelFactory = TransactionEntryViewModelFactory(
+        accountRepository = accountRepository,
+        categoryRepository = categoryRepository,
+        saveManualTransaction = saveManualTransaction,
+        appLogger = appLogger,
+        initialTransactionType = type,
+    )
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TransactionEntryViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

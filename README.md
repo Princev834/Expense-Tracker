@@ -26,6 +26,7 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 17: Default ledger bootstrap — complete
 - Phase 18: Manual transaction command — complete
 - Phase 19: Transaction entry state and ViewModel — complete
+- Phase 20: Real transaction entry screen and navigation — complete
 
 ## Development baseline
 
@@ -121,3 +122,10 @@ timestamps, and identifier uniqueness before creating a Room transaction.
 The transactions feature now owns a lifecycle-aware ViewModel and immutable form
 state. It observes active accounts and matching categories, validates the form,
 saves through the Phase 18 command, and exposes one-off user messages.
+
+## Phase 20
+
+Home quick actions now open a dedicated expense or income screen. The form shows
+type, amount, account, category, payment method, and note in the correct order,
+with the save action after all fields. The temporary dashboard entry fields have
+been removed from the visible Home screen.

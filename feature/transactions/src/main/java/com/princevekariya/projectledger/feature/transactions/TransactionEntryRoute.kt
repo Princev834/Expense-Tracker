@@ -1,4 +1,4 @@
-package com.princevekariya.projectledger.feature.dashboard
+package com.princevekariya.projectledger.feature.transactions
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,25 +14,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.core.designsystem.theme.ledgerSpacing
+import com.princevekariya.projectledger.core.model.TransactionType
 
 @Composable
-fun DashboardRoute(
-    initialState: DashboardUiState,
-    appLogger: AppLogger,
-    onAddExpense: () -> Unit,
-    onAddIncome: () -> Unit,
+fun TransactionEntryRoute(
+    factory: TransactionEntryViewModelFactory,
+    initialTransactionType: TransactionType,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val factory = remember(initialState, appLogger) {
-        DashboardViewModelFactory(
-            initialState = initialState,
-            appLogger = appLogger,
-        )
+    val typedFactory = remember(factory, initialTransactionType) {
+        factory.forTransactionType(type = initialTransactionType)
     }
-    val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
-    val state by dashboardViewModel.uiState.collectAsStateWithLifecycle()
+    val transactionEntryViewModel: TransactionEntryViewModel = viewModel(
+        key = "transaction-entry-${initialTransactionType.name}",
+        factory = typedFactory,
+    )
+    val state by transactionEntryViewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val userMessage = state.userMessage
     val spacing = MaterialTheme.ledgerSpacing
@@ -40,8 +39,8 @@ fun DashboardRoute(
     LaunchedEffect(userMessage?.id) {
         if (userMessage != null) {
             snackbarHostState.showSnackbar(message = userMessage.text)
-            dashboardViewModel.onAction(
-                DashboardAction.MessageShown(id = userMessage.id),
+            transactionEntryViewModel.onAction(
+                TransactionEntryAction.MessageShown(id = userMessage.id),
             )
         }
     }
@@ -49,11 +48,10 @@ fun DashboardRoute(
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
-        FoundationDashboard(
+        TransactionEntryScreen(
             state = state,
-            onAction = dashboardViewModel::onAction,
-            onAddExpense = onAddExpense,
-            onAddIncome = onAddIncome,
+            onAction = transactionEntryViewModel::onAction,
+            onNavigateBack = onNavigateBack,
         )
         SnackbarHost(
             hostState = snackbarHostState,
