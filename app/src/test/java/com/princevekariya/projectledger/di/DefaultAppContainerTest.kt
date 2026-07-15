@@ -16,7 +16,11 @@ import com.princevekariya.projectledger.domain.transactions.repository.Transacti
 import com.princevekariya.projectledger.feature.dashboard.DashboardRepositories
 import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
+import com.princevekariya.projectledger.feature.reports.MonthlyReportRepositories
+import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryRepositories
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
 import java.lang.reflect.Proxy
 import java.time.ZoneOffset
 import org.junit.Assert.assertSame
@@ -25,10 +29,44 @@ import org.junit.Test
 class DefaultAppContainerTest {
     @Test
     fun containerReturnsEveryDependencyProvidedByTheCompositionRoot() {
-        val accounts = unusedProxy<AccountRepository>()
-        val categories = unusedProxy<CategoryRepository>()
-        val merchants = unusedProxy<MerchantRepository>()
-        val transactions = unusedProxy<TransactionRepository>()
+        val fixture = Fixture()
+
+        assertSame(NoOpAppLogger, fixture.container.appLogger)
+        assertSame(fixture.repositories, fixture.container.repositories)
+        assertSame(
+            fixture.initializer,
+            fixture.container.ensureDefaultLedgerData,
+        )
+        assertSame(
+            fixture.saver,
+            fixture.container.saveManualTransaction,
+        )
+        assertSame(
+            fixture.entryFactory,
+            fixture.container.transactionEntryViewModelFactory,
+        )
+        assertSame(
+            fixture.historyFactory,
+            fixture.container.transactionHistoryViewModelFactory,
+        )
+        assertSame(
+            fixture.reportFactory,
+            fixture.container.monthlyReportViewModelFactory,
+        )
+        assertSame(
+            fixture.dashboardFactory,
+            fixture.container.createDashboardViewModelFactory(
+                initialState = fixture.initialDashboardState,
+            ),
+        )
+    }
+
+    private class Fixture {
+        private val accounts = unusedProxy<AccountRepository>()
+        private val categories = unusedProxy<CategoryRepository>()
+        private val merchants = unusedProxy<MerchantRepository>()
+        private val transactions = unusedProxy<TransactionRepository>()
+
         val repositories = LedgerRepositories(
             accounts = accounts,
             budgets = unusedProxy<BudgetRepository>(),
@@ -58,6 +96,26 @@ class DefaultAppContainerTest {
             saveManualTransaction = saver,
             appLogger = NoOpAppLogger,
         )
+        val historyFactory = TransactionHistoryViewModelFactory(
+            repositories = TransactionHistoryRepositories(
+                accounts = accounts,
+                transactions = transactions,
+                categories = categories,
+                merchants = merchants,
+            ),
+            timeProvider = zeroTimeProvider(),
+            zoneId = ZoneOffset.UTC,
+            appLogger = NoOpAppLogger,
+        )
+        val reportFactory = MonthlyReportViewModelFactory(
+            repositories = MonthlyReportRepositories(
+                transactions = transactions,
+                categories = categories,
+            ),
+            timeProvider = zeroTimeProvider(),
+            zoneId = ZoneOffset.UTC,
+            appLogger = NoOpAppLogger,
+        )
         val initialDashboardState = dashboardState()
         val dashboardFactory = DashboardViewModelFactory(
             initialState = initialDashboardState,
@@ -67,9 +125,7 @@ class DefaultAppContainerTest {
                 categories = categories,
                 merchants = merchants,
             ),
-            timeProvider = EpochTimeProvider {
-                0L
-            },
+            timeProvider = zeroTimeProvider(),
             zoneId = ZoneOffset.UTC,
             appLogger = NoOpAppLogger,
         )
@@ -79,40 +135,36 @@ class DefaultAppContainerTest {
             ensureDefaultLedgerData = initializer,
             saveManualTransaction = saver,
             transactionEntryViewModelFactory = entryFactory,
+            transactionHistoryViewModelFactory = historyFactory,
+            monthlyReportViewModelFactory = reportFactory,
             dashboardViewModelFactoryProvider = {
                 dashboardFactory
             },
         )
-
-        assertSame(NoOpAppLogger, container.appLogger)
-        assertSame(repositories, container.repositories)
-        assertSame(initializer, container.ensureDefaultLedgerData)
-        assertSame(saver, container.saveManualTransaction)
-        assertSame(entryFactory, container.transactionEntryViewModelFactory)
-        assertSame(
-            dashboardFactory,
-            container.createDashboardViewModelFactory(
-                initialState = initialDashboardState,
-            ),
-        )
     }
 
-    private fun dashboardState(): DashboardUiState = DashboardUiState(
-        variant = AppVariantConfiguration(
-            distribution = AppDistribution.PERSONAL,
-            displayName = "Personal APK",
-            supportsSmsAutomation = true,
-            isPlayStoreSafe = false,
-        ),
-        platformDescription = "Android test device",
-        moduleCount = 9,
-    )
+    private companion object {
+        fun dashboardState(): DashboardUiState = DashboardUiState(
+            variant = AppVariantConfiguration(
+                distribution = AppDistribution.PERSONAL,
+                displayName = "Personal APK",
+                supportsSmsAutomation = true,
+                isPlayStoreSafe = false,
+            ),
+            platformDescription = "Android test device",
+            moduleCount = 10,
+        )
 
-    @Suppress("UNCHECKED_CAST")
-    private inline fun <reified T> unusedProxy(): T = Proxy.newProxyInstance(
-        T::class.java.classLoader,
-        arrayOf(T::class.java),
-    ) { _, method, _ ->
-        error("Unexpected repository call: ${method.name}")
-    } as T
+        fun zeroTimeProvider(): EpochTimeProvider = EpochTimeProvider {
+            0L
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        inline fun <reified T> unusedProxy(): T = Proxy.newProxyInstance(
+            T::class.java.classLoader,
+            arrayOf(T::class.java),
+        ) { _, method, _ ->
+            error("Unexpected repository call: ${method.name}")
+        } as T
+    }
 }

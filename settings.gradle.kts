@@ -27,5 +27,6 @@ include(":domain:transactions")
 
 include(":feature:dashboard")
 include(":feature:transactions")
+include(":feature:reports")
 
 include(":platform:device")

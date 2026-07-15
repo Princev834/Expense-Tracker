@@ -103,6 +103,7 @@ dependencies {
     implementation(project(":domain:transactions"))
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:transactions"))
+    implementation(project(":feature:reports"))
     implementation(project(":platform:device"))
 
     implementation(libs.androidx.core.ktx)

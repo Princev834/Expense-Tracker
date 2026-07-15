@@ -14,15 +14,20 @@ import androidx.navigation.navDeepLink
 import com.princevekariya.projectledger.core.model.TransactionType
 import com.princevekariya.projectledger.feature.dashboard.DashboardRoute
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
+import com.princevekariya.projectledger.feature.reports.MonthlyReportRoute
+import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryRoute
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
-import com.princevekariya.projectledger.feature.transactions.TransactionsPlaceholderScreen
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryRoute
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
 
 @Composable
 internal fun ProjectLedgerNavHost(
     navController: NavHostController,
     dashboardViewModelFactory: DashboardViewModelFactory,
     transactionEntryViewModelFactory: TransactionEntryViewModelFactory,
+    transactionHistoryViewModelFactory: TransactionHistoryViewModelFactory,
+    monthlyReportViewModelFactory: MonthlyReportViewModelFactory,
     contentPadding: PaddingValues,
 ) {
     NavHost(
@@ -34,8 +39,12 @@ internal fun ProjectLedgerNavHost(
             navController = navController,
             factory = dashboardViewModelFactory,
         )
-        transactionsDestination()
-        reportsDestination()
+        transactionsDestination(
+            factory = transactionHistoryViewModelFactory,
+        )
+        reportsDestination(
+            factory = monthlyReportViewModelFactory,
+        )
         settingsDestination()
         transactionEntryDestination(
             navController = navController,
@@ -69,7 +78,7 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController, fa
     }
 }
 
-private fun NavGraphBuilder.transactionsDestination() {
+private fun NavGraphBuilder.transactionsDestination(factory: TransactionHistoryViewModelFactory) {
     composable(
         route = LedgerDestination.TRANSACTIONS.route,
         deepLinks = listOf(
@@ -78,11 +87,11 @@ private fun NavGraphBuilder.transactionsDestination() {
             },
         ),
     ) {
-        TransactionsPlaceholderScreen()
+        TransactionHistoryRoute(factory = factory)
     }
 }
 
-private fun NavGraphBuilder.reportsDestination() {
+private fun NavGraphBuilder.reportsDestination(factory: MonthlyReportViewModelFactory) {
     composable(
         route = LedgerDestination.REPORTS.route,
         deepLinks = listOf(
@@ -91,10 +100,7 @@ private fun NavGraphBuilder.reportsDestination() {
             },
         ),
     ) {
-        FutureFeatureScreen(
-            title = "Reports",
-            message = "Monthly charts, summaries, and PDF export will be built here.",
-        )
+        MonthlyReportRoute(factory = factory)
     }
 }
 

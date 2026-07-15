@@ -6,7 +6,9 @@ import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefa
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
 import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
+import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
 
 interface AppContainer {
     val appLogger: AppLogger
@@ -18,6 +20,11 @@ interface AppContainer {
     val saveManualTransaction: SaveManualTransactionUseCase
 
     val transactionEntryViewModelFactory: TransactionEntryViewModelFactory
+
+    val transactionHistoryViewModelFactory:
+        TransactionHistoryViewModelFactory
+
+    val monthlyReportViewModelFactory: MonthlyReportViewModelFactory
 
     fun createDashboardViewModelFactory(initialState: DashboardUiState): DashboardViewModelFactory
 }

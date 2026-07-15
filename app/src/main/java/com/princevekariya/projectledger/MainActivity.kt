@@ -39,12 +39,16 @@ class MainActivity : ComponentActivity() {
                     dashboardViewModelFactory = dashboardViewModelFactory,
                     transactionEntryViewModelFactory =
                     appContainer.transactionEntryViewModelFactory,
+                    transactionHistoryViewModelFactory =
+                    appContainer.transactionHistoryViewModelFactory,
+                    monthlyReportViewModelFactory =
+                    appContainer.monthlyReportViewModelFactory,
                 )
             }
         }
     }
 
     private companion object {
-        const val PROJECT_MODULE_COUNT: Int = 9
+        const val PROJECT_MODULE_COUNT: Int = 10
     }
 }

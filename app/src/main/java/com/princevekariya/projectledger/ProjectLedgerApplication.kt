@@ -13,7 +13,11 @@ import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefa
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
 import com.princevekariya.projectledger.feature.dashboard.DashboardRepositories
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
+import com.princevekariya.projectledger.feature.reports.MonthlyReportRepositories
+import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryRepositories
+import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
 import com.princevekariya.projectledger.platform.device.AndroidAppLogger
 import com.princevekariya.projectledger.platform.device.AndroidProcessErrorReporter
 import java.time.ZoneId
@@ -63,6 +67,28 @@ class ProjectLedgerApplication : Application() {
                 saveManualTransaction = saveManualTransaction,
                 appLogger = appLogger,
             ),
+            transactionHistoryViewModelFactory =
+            TransactionHistoryViewModelFactory(
+                repositories = TransactionHistoryRepositories(
+                    accounts = repositories.accounts,
+                    transactions = repositories.transactions,
+                    categories = repositories.categories,
+                    merchants = repositories.merchants,
+                ),
+                timeProvider = SystemEpochTimeProvider,
+                zoneId = ZoneId.systemDefault(),
+                appLogger = appLogger,
+            ),
+            monthlyReportViewModelFactory =
+            MonthlyReportViewModelFactory(
+                repositories = MonthlyReportRepositories(
+                    transactions = repositories.transactions,
+                    categories = repositories.categories,
+                ),
+                timeProvider = SystemEpochTimeProvider,
+                zoneId = ZoneId.systemDefault(),
+                appLogger = appLogger,
+            ),
             dashboardViewModelFactoryProvider = { initialState ->
                 DashboardViewModelFactory(
                     initialState = initialState,
@@ -103,6 +129,14 @@ class ProjectLedgerApplication : Application() {
         appLogger.info(
             event = "live_dashboard_factory_ready",
             message = "The live Room dashboard factory is ready.",
+        )
+        appLogger.info(
+            event = "transaction_history_factory_ready",
+            message = "The live Room transaction history factory is ready.",
+        )
+        appLogger.info(
+            event = "monthly_report_factory_ready",
+            message = "The live Room monthly report factory is ready.",
         )
     }
 
