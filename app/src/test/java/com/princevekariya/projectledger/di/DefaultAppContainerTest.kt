@@ -2,6 +2,8 @@ package com.princevekariya.projectledger.di
 
 import com.princevekariya.projectledger.core.common.NoOpAppLogger
 import com.princevekariya.projectledger.core.database.repository.LedgerRepositories
+import com.princevekariya.projectledger.core.model.AppDistribution
+import com.princevekariya.projectledger.core.model.AppVariantConfiguration
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.command.EpochTimeProvider
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
@@ -11,8 +13,12 @@ import com.princevekariya.projectledger.domain.transactions.repository.BudgetRep
 import com.princevekariya.projectledger.domain.transactions.repository.CategoryRepository
 import com.princevekariya.projectledger.domain.transactions.repository.MerchantRepository
 import com.princevekariya.projectledger.domain.transactions.repository.TransactionRepository
+import com.princevekariya.projectledger.feature.dashboard.DashboardRepositories
+import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
+import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import java.lang.reflect.Proxy
+import java.time.ZoneOffset
 import org.junit.Assert.assertSame
 import org.junit.Test
 
@@ -52,12 +58,30 @@ class DefaultAppContainerTest {
             saveManualTransaction = saver,
             appLogger = NoOpAppLogger,
         )
+        val initialDashboardState = dashboardState()
+        val dashboardFactory = DashboardViewModelFactory(
+            initialState = initialDashboardState,
+            repositories = DashboardRepositories(
+                accounts = accounts,
+                transactions = transactions,
+                categories = categories,
+                merchants = merchants,
+            ),
+            timeProvider = EpochTimeProvider {
+                0L
+            },
+            zoneId = ZoneOffset.UTC,
+            appLogger = NoOpAppLogger,
+        )
         val container = DefaultAppContainer(
             appLogger = NoOpAppLogger,
             repositories = repositories,
             ensureDefaultLedgerData = initializer,
             saveManualTransaction = saver,
             transactionEntryViewModelFactory = entryFactory,
+            dashboardViewModelFactoryProvider = {
+                dashboardFactory
+            },
         )
 
         assertSame(NoOpAppLogger, container.appLogger)
@@ -65,7 +89,24 @@ class DefaultAppContainerTest {
         assertSame(initializer, container.ensureDefaultLedgerData)
         assertSame(saver, container.saveManualTransaction)
         assertSame(entryFactory, container.transactionEntryViewModelFactory)
+        assertSame(
+            dashboardFactory,
+            container.createDashboardViewModelFactory(
+                initialState = initialDashboardState,
+            ),
+        )
     }
+
+    private fun dashboardState(): DashboardUiState = DashboardUiState(
+        variant = AppVariantConfiguration(
+            distribution = AppDistribution.PERSONAL,
+            displayName = "Personal APK",
+            supportsSmsAutomation = true,
+            isPlayStoreSafe = false,
+        ),
+        platformDescription = "Android test device",
+        moduleCount = 9,
+    )
 
     @Suppress("UNCHECKED_CAST")
     private inline fun <reified T> unusedProxy(): T = Proxy.newProxyInstance(

@@ -8,15 +8,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.princevekariya.projectledger.core.common.AppLogger
-import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
+import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 
 @Composable
 fun ProjectLedgerApp(
-    dashboardInitialState: DashboardUiState,
+    dashboardViewModelFactory: DashboardViewModelFactory,
     transactionEntryViewModelFactory: TransactionEntryViewModelFactory,
-    appLogger: AppLogger,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
@@ -36,9 +34,9 @@ fun ProjectLedgerApp(
     ) { contentPadding ->
         ProjectLedgerNavHost(
             navController = navController,
-            dashboardInitialState = dashboardInitialState,
-            transactionEntryViewModelFactory = transactionEntryViewModelFactory,
-            appLogger = appLogger,
+            dashboardViewModelFactory = dashboardViewModelFactory,
+            transactionEntryViewModelFactory =
+            transactionEntryViewModelFactory,
             contentPadding = contentPadding,
         )
     }

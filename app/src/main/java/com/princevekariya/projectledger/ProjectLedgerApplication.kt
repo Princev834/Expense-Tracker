@@ -11,9 +11,12 @@ import com.princevekariya.projectledger.di.SystemEpochTimeProvider
 import com.princevekariya.projectledger.di.UuidTransactionIdGenerator
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
+import com.princevekariya.projectledger.feature.dashboard.DashboardRepositories
+import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.platform.device.AndroidAppLogger
 import com.princevekariya.projectledger.platform.device.AndroidProcessErrorReporter
+import java.time.ZoneId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -60,8 +63,27 @@ class ProjectLedgerApplication : Application() {
                 saveManualTransaction = saveManualTransaction,
                 appLogger = appLogger,
             ),
+            dashboardViewModelFactoryProvider = { initialState ->
+                DashboardViewModelFactory(
+                    initialState = initialState,
+                    repositories = DashboardRepositories(
+                        accounts = repositories.accounts,
+                        transactions = repositories.transactions,
+                        categories = repositories.categories,
+                        merchants = repositories.merchants,
+                    ),
+                    timeProvider = SystemEpochTimeProvider,
+                    zoneId = ZoneId.systemDefault(),
+                    appLogger = appLogger,
+                )
+            },
         )
 
+        logReadyDependencies(appLogger = appLogger)
+        initializeDefaultLedgerData()
+    }
+
+    private fun logReadyDependencies(appLogger: AndroidAppLogger) {
         appLogger.info(
             event = "application_container_ready",
             message = "Logging and five local repositories are ready.",
@@ -78,7 +100,10 @@ class ProjectLedgerApplication : Application() {
             event = "transaction_entry_state_ready",
             message = "Transaction entry state and ViewModel factory are ready.",
         )
-        initializeDefaultLedgerData()
+        appLogger.info(
+            event = "live_dashboard_factory_ready",
+            message = "The live Room dashboard factory is ready.",
+        )
     }
 
     private fun initializeDefaultLedgerData() {

@@ -28,6 +28,7 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 19: Transaction entry state and ViewModel — complete
 - Phase 20: Real transaction entry screen and navigation — complete
 - Phase 21: Atomic account balance updates — complete
+- Phase 22: Live Room dashboard — complete
 
 ## Development baseline
 
@@ -136,3 +137,10 @@ been removed from the visible Home screen.
 Saving an expense now reduces the selected account balance, while saving income
 increases it. Room writes the updated account and transaction inside one
 database transaction so partial financial state cannot be committed.
+
+## Phase 22
+
+The Home dashboard now observes Room-backed repositories. It displays the total
+balance across active accounts, current-month income and expenses, and the five
+most recent transactions. Saving through the transaction-entry screen updates
+Home automatically when the user returns.

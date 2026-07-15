@@ -18,24 +18,27 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val appLogger = appContainer.appLogger
-        appLogger.info(
+        appContainer.appLogger.info(
             event = "main_activity_created",
             message = "Main application activity resolved its dependencies.",
         )
         val deviceInfo = AndroidDeviceInfoProvider().getDeviceInfo()
+        val initialDashboardState = DashboardUiState(
+            variant = CurrentAppVariant.configuration,
+            platformDescription = deviceInfo.displayValue,
+            moduleCount = PROJECT_MODULE_COUNT,
+        )
+        val dashboardViewModelFactory =
+            appContainer.createDashboardViewModelFactory(
+                initialState = initialDashboardState,
+            )
 
         setContent {
             ProjectLedgerTheme {
                 ProjectLedgerApp(
-                    dashboardInitialState = DashboardUiState(
-                        variant = CurrentAppVariant.configuration,
-                        platformDescription = deviceInfo.displayValue,
-                        moduleCount = PROJECT_MODULE_COUNT,
-                    ),
+                    dashboardViewModelFactory = dashboardViewModelFactory,
                     transactionEntryViewModelFactory =
                     appContainer.transactionEntryViewModelFactory,
-                    appLogger = appLogger,
                 )
             }
         }

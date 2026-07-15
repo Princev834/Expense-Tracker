@@ -26,6 +26,7 @@ import com.princevekariya.projectledger.core.designsystem.component.LedgerSurfac
 import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionDirection
 import com.princevekariya.projectledger.core.designsystem.component.LedgerTransactionRow
 import com.princevekariya.projectledger.core.designsystem.theme.ledgerSpacing
+import com.princevekariya.projectledger.core.model.TransactionType
 
 @Composable
 fun FoundationDashboard(
@@ -49,22 +50,67 @@ fun FoundationDashboard(
         verticalArrangement = Arrangement.spacedBy(spacing.large),
     ) {
         DashboardHeader(state = state)
+        DashboardBody(
+            state = state,
+            onAction = onAction,
+            onAddExpense = onAddExpense,
+            onAddIncome = onAddIncome,
+        )
+        Text(
+            text = "Phase 22 - live Room dashboard",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+    }
+}
+
+@Composable
+private fun DashboardBody(
+    state: DashboardUiState,
+    onAction: (DashboardAction) -> Unit,
+    onAddExpense: () -> Unit,
+    onAddIncome: () -> Unit,
+) {
+    when (val loadState = state.loadState) {
+        UiLoadState.Idle,
+        UiLoadState.Loading,
+        -> LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
+            LedgerLoadingState(message = "Loading your ledger")
+        }
+        UiLoadState.Content -> DashboardContent(
+            state = state,
+            onAddExpense = onAddExpense,
+            onAddIncome = onAddIncome,
+        )
+        is UiLoadState.Error -> LedgerSurfaceCard(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            LedgerErrorState(
+                title = "Unable to load dashboard",
+                message = loadState.message,
+                onRetry = {
+                    onAction(DashboardAction.RetryRequested)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun DashboardContent(state: DashboardUiState, onAddExpense: () -> Unit, onAddIncome: () -> Unit) {
+    val spacing = MaterialTheme.ledgerSpacing
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacing.large),
+    ) {
+        BalanceSection(state = state)
         MetricSection(state = state)
         ActionSection(
             onAddExpense = onAddExpense,
             onAddIncome = onAddIncome,
         )
-        TransactionSection()
-        StateSection(
-            loadState = state.loadState,
-            onRetry = {
-                onAction(DashboardAction.RetryRequested)
-            },
-        )
-        Text(
-            text = "Phase 21 - atomic account balance updates",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.secondary,
+        TransactionSection(
+            transactions = state.recentTransactions,
         )
     }
 }
@@ -73,23 +119,43 @@ fun FoundationDashboard(
 private fun DashboardHeader(state: DashboardUiState) {
     val spacing = MaterialTheme.ledgerSpacing
 
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.extraSmall)) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+    ) {
         Text(
             text = "Project Ledger",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "Use the quick actions to open the dedicated expense or income form.",
+            text = "Your balance and recent activity update automatically.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = "${state.variant.displayName} - ${state.platformDescription} - ${state.moduleCount} modules",
+            text = "${state.variant.displayName} - " +
+                "${state.platformDescription} - " +
+                "${state.moduleCount} modules",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+@Composable
+private fun BalanceSection(state: DashboardUiState) {
+    val supportingText = when (state.activeAccountCount) {
+        1 -> "1 active account"
+        else -> "${state.activeAccountCount} active accounts"
+    }
+
+    LedgerMetricCard(
+        title = "Total balance",
+        value = state.totalBalance.formatted(),
+        supportingText = supportingText,
+        tone = LedgerMetricTone.NEUTRAL,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -120,7 +186,7 @@ private fun MetricSection(state: DashboardUiState) {
 @Composable
 private fun ActionSection(onAddExpense: () -> Unit, onAddIncome: () -> Unit) {
     LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle(title = "Actions")
+        SectionTitle(title = "Quick actions")
         LedgerPrimaryButton(
             label = "Add expense",
             onClick = onAddExpense,
@@ -135,53 +201,37 @@ private fun ActionSection(onAddExpense: () -> Unit, onAddIncome: () -> Unit) {
 }
 
 @Composable
-private fun TransactionSection() {
+private fun TransactionSection(transactions: List<DashboardTransactionItem>) {
     LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
         SectionTitle(title = "Recent activity")
-        LedgerTransactionRow(
-            title = "College canteen",
-            subtitle = "Food and Dining - Today",
-            amount = "- INR 120",
-            direction = LedgerTransactionDirection.EXPENSE,
-        )
-        LedgerTransactionRow(
-            title = "Pocket money",
-            subtitle = "Income - Yesterday",
-            amount = "+ INR 5,000",
-            direction = LedgerTransactionDirection.INCOME,
-        )
-        LedgerTransactionRow(
-            title = "Cash withdrawal",
-            subtitle = "Bank to Cash - 10 Jul",
-            amount = "INR 1,000",
-            direction = LedgerTransactionDirection.TRANSFER,
-        )
+        if (transactions.isEmpty()) {
+            LedgerEmptyState(
+                title = "No transactions yet",
+                message = "Add an expense or income to see it here.",
+            )
+        } else {
+            transactions.forEach { transaction ->
+                LedgerTransactionRow(
+                    title = transaction.title,
+                    subtitle = transaction.subtitle,
+                    amount = transaction.signedAmount(),
+                    direction = transaction.type.toDirection(),
+                )
+            }
+        }
     }
 }
 
-@Composable
-private fun StateSection(loadState: UiLoadState, onRetry: () -> Unit) {
-    LedgerSurfaceCard(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle(title = "Screen state")
-        when (loadState) {
-            UiLoadState.Idle -> LedgerEmptyState(
-                title = "Waiting to start",
-                message = "This screen has not requested its data yet.",
-            )
-            UiLoadState.Loading -> LedgerLoadingState(
-                message = "Preparing dashboard data",
-            )
-            UiLoadState.Content -> LedgerEmptyState(
-                title = "State is ready",
-                message = "Inputs, actions, and one-off messages now come from the ViewModel.",
-            )
-            is UiLoadState.Error -> LedgerErrorState(
-                title = "Unable to load dashboard",
-                message = loadState.message,
-                onRetry = onRetry,
-            )
-        }
-    }
+private fun DashboardTransactionItem.signedAmount(): String = when (type) {
+    TransactionType.EXPENSE -> "- ${amount.formatted()}"
+    TransactionType.INCOME -> "+ ${amount.formatted()}"
+    TransactionType.TRANSFER -> amount.formatted()
+}
+
+private fun TransactionType.toDirection(): LedgerTransactionDirection = when (this) {
+    TransactionType.EXPENSE -> LedgerTransactionDirection.EXPENSE
+    TransactionType.INCOME -> LedgerTransactionDirection.INCOME
+    TransactionType.TRANSFER -> LedgerTransactionDirection.TRANSFER
 }
 
 @Composable

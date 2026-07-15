@@ -4,6 +4,8 @@ import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.core.database.repository.LedgerRepositories
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
+import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
+import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 
 interface AppContainer {
@@ -16,4 +18,6 @@ interface AppContainer {
     val saveManualTransaction: SaveManualTransactionUseCase
 
     val transactionEntryViewModelFactory: TransactionEntryViewModelFactory
+
+    fun createDashboardViewModelFactory(initialState: DashboardUiState): DashboardViewModelFactory
 }

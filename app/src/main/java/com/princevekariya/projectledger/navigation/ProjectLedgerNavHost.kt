@@ -11,10 +11,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.core.model.TransactionType
 import com.princevekariya.projectledger.feature.dashboard.DashboardRoute
-import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
+import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryRoute
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionsPlaceholderScreen
@@ -22,9 +21,8 @@ import com.princevekariya.projectledger.feature.transactions.TransactionsPlaceho
 @Composable
 internal fun ProjectLedgerNavHost(
     navController: NavHostController,
-    dashboardInitialState: DashboardUiState,
+    dashboardViewModelFactory: DashboardViewModelFactory,
     transactionEntryViewModelFactory: TransactionEntryViewModelFactory,
-    appLogger: AppLogger,
     contentPadding: PaddingValues,
 ) {
     NavHost(
@@ -34,8 +32,7 @@ internal fun ProjectLedgerNavHost(
     ) {
         homeDestination(
             navController = navController,
-            dashboardInitialState = dashboardInitialState,
-            appLogger = appLogger,
+            factory = dashboardViewModelFactory,
         )
         transactionsDestination()
         reportsDestination()
@@ -47,11 +44,7 @@ internal fun ProjectLedgerNavHost(
     }
 }
 
-private fun NavGraphBuilder.homeDestination(
-    navController: NavHostController,
-    dashboardInitialState: DashboardUiState,
-    appLogger: AppLogger,
-) {
+private fun NavGraphBuilder.homeDestination(navController: NavHostController, factory: DashboardViewModelFactory) {
     composable(
         route = LedgerDestination.HOME.route,
         deepLinks = listOf(
@@ -61,8 +54,7 @@ private fun NavGraphBuilder.homeDestination(
         ),
     ) {
         DashboardRoute(
-            initialState = dashboardInitialState,
-            appLogger = appLogger,
+            factory = factory,
             onAddExpense = {
                 navController.navigateToTransactionEntry(
                     type = TransactionType.EXPENSE,

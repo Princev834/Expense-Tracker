@@ -1,99 +1,93 @@
 package com.princevekariya.projectledger.feature.dashboard
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.princevekariya.projectledger.core.common.AppLogger
 import com.princevekariya.projectledger.core.common.UiLoadState
-import com.princevekariya.projectledger.core.common.UiMessage
-import com.princevekariya.projectledger.core.common.info
-import com.princevekariya.projectledger.core.common.warning
-import com.princevekariya.projectledger.core.model.Money
+import com.princevekariya.projectledger.core.common.error
+import com.princevekariya.projectledger.core.model.CategoryType
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
-class DashboardViewModel(
+internal class DashboardViewModel(
     initialState: DashboardUiState,
+    private val repositories: DashboardRepositories,
+    private val dataMapper: DashboardDataMapper,
     private val appLogger: AppLogger,
 ) : ViewModel() {
     private val mutableUiState = MutableStateFlow(initialState)
-    private var nextMessageId: Long = initialState.userMessage?.id ?: 0L
+    private var observationJob: Job? = null
 
-    val uiState: StateFlow<DashboardUiState> = mutableUiState.asStateFlow()
+    val uiState: StateFlow<DashboardUiState> =
+        mutableUiState.asStateFlow()
+
+    init {
+        observeDashboard()
+    }
 
     fun onAction(action: DashboardAction) {
         when (action) {
-            is DashboardAction.DescriptionChanged -> updateDescription(action.value)
-            is DashboardAction.AmountChanged -> updateAmount(action.value)
-            DashboardAction.AddExpenseClicked -> validateDraft(transactionType = "expense")
-            DashboardAction.AddIncomeClicked -> validateDraft(transactionType = "income")
-            DashboardAction.RetryRequested -> retryContent()
-            is DashboardAction.MessageShown -> consumeMessage(action.id)
+            DashboardAction.RetryRequested -> observeDashboard()
         }
     }
 
-    private fun updateDescription(value: String) {
-        mutableUiState.value = mutableUiState.value.copy(description = value)
-    }
-
-    private fun updateAmount(value: String) {
-        mutableUiState.value = mutableUiState.value.copy(amount = value)
-    }
-
-    private fun validateDraft(transactionType: String) {
-        val state = mutableUiState.value
-        if (state.description.isBlank()) {
-            appLogger.warning(
-                event = "transaction_draft_rejected",
-                message = "A transaction draft was missing its description.",
-            )
-            showMessage(text = "Enter a description before continuing.")
-            return
-        }
-
-        val amount = Money.parseMajorUnits(state.amount).getOrNull()
-        if (amount == null || !amount.isPositive) {
-            appLogger.warning(
-                event = "transaction_draft_rejected",
-                message = "A transaction draft contained an invalid amount.",
-            )
-            showMessage(text = "Enter a valid amount greater than zero.")
-            return
-        }
-
-        appLogger.info(
-            event = "transaction_draft_validated",
-            message = "A $transactionType draft passed local validation.",
-        )
-        showMessage(
-            text = "${transactionType.replaceFirstChar { character -> character.uppercase() }} draft is ready.",
-        )
-    }
-
-    private fun retryContent() {
+    private fun observeDashboard() {
+        observationJob?.cancel()
         mutableUiState.value = mutableUiState.value.copy(
-            loadState = UiLoadState.Content,
+            loadState = UiLoadState.Loading,
         )
-        appLogger.info(
-            event = "dashboard_retry_completed",
-            message = "Dashboard content returned to the content state.",
-        )
-        showMessage(text = "Dashboard content is ready.")
-    }
-
-    private fun showMessage(text: String) {
-        nextMessageId += 1L
-        mutableUiState.value = mutableUiState.value.copy(
-            userMessage = UiMessage(
-                id = nextMessageId,
-                text = text,
-            ),
-        )
-    }
-
-    private fun consumeMessage(id: Long) {
-        val currentMessage = mutableUiState.value.userMessage
-        if (currentMessage?.id == id) {
-            mutableUiState.value = mutableUiState.value.copy(userMessage = null)
+        observationJob = viewModelScope.launch {
+            dashboardSourceFlow()
+                .catch { throwable ->
+                    mutableUiState.value = mutableUiState.value.copy(
+                        loadState = UiLoadState.Error(
+                            message = "Unable to load your dashboard data.",
+                        ),
+                    )
+                    appLogger.error(
+                        event = "live_dashboard_load_failed",
+                        message = "Live dashboard data could not be loaded.",
+                        throwable = throwable,
+                    )
+                }
+                .collect { sourceData ->
+                    mutableUiState.value = dataMapper.map(
+                        baseState = mutableUiState.value,
+                        sourceData = sourceData,
+                    )
+                }
         }
+    }
+
+    private fun dashboardSourceFlow(): Flow<DashboardSourceData> = combine(
+        repositories.accounts.observeAll(),
+        repositories.transactions.observeAll(),
+        repositories.categories.observeActive(
+            type = CategoryType.EXPENSE,
+        ),
+        repositories.categories.observeActive(
+            type = CategoryType.INCOME,
+        ),
+        repositories.merchants.observeActive(),
+    ) {
+            accounts,
+            transactions,
+            expenseCategories,
+            incomeCategories,
+            merchants,
+        ->
+        DashboardSourceData(
+            accounts = accounts,
+            transactions = transactions,
+            expenseCategories = expenseCategories,
+            incomeCategories = incomeCategories,
+            merchants = merchants,
+        )
     }
 }
