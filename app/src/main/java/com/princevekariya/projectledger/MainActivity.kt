@@ -43,12 +43,14 @@ class MainActivity : ComponentActivity() {
                     appContainer.transactionHistoryViewModelFactory,
                     monthlyReportViewModelFactory =
                     appContainer.monthlyReportViewModelFactory,
+                    accountSettingsViewModelFactory =
+                    appContainer.accountSettingsViewModelFactory,
                 )
             }
         }
     }
 
     private companion object {
-        const val PROJECT_MODULE_COUNT: Int = 10
+        const val PROJECT_MODULE_COUNT: Int = 11
     }
 }

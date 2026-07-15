@@ -10,6 +10,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
+import com.princevekariya.projectledger.feature.settings.AccountSettingsViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
 
@@ -19,6 +20,7 @@ fun ProjectLedgerApp(
     transactionEntryViewModelFactory: TransactionEntryViewModelFactory,
     transactionHistoryViewModelFactory: TransactionHistoryViewModelFactory,
     monthlyReportViewModelFactory: MonthlyReportViewModelFactory,
+    accountSettingsViewModelFactory: AccountSettingsViewModelFactory,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
@@ -45,6 +47,8 @@ fun ProjectLedgerApp(
             transactionHistoryViewModelFactory,
             monthlyReportViewModelFactory =
             monthlyReportViewModelFactory,
+            accountSettingsViewModelFactory =
+            accountSettingsViewModelFactory,
             contentPadding = contentPadding,
         )
     }

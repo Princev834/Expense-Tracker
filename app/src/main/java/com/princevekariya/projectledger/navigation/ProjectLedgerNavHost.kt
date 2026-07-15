@@ -16,6 +16,8 @@ import com.princevekariya.projectledger.feature.dashboard.DashboardRoute
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.reports.MonthlyReportRoute
 import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
+import com.princevekariya.projectledger.feature.settings.AccountSettingsRoute
+import com.princevekariya.projectledger.feature.settings.AccountSettingsViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryRoute
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionHistoryRoute
@@ -28,6 +30,7 @@ internal fun ProjectLedgerNavHost(
     transactionEntryViewModelFactory: TransactionEntryViewModelFactory,
     transactionHistoryViewModelFactory: TransactionHistoryViewModelFactory,
     monthlyReportViewModelFactory: MonthlyReportViewModelFactory,
+    accountSettingsViewModelFactory: AccountSettingsViewModelFactory,
     contentPadding: PaddingValues,
 ) {
     NavHost(
@@ -45,7 +48,9 @@ internal fun ProjectLedgerNavHost(
         reportsDestination(
             factory = monthlyReportViewModelFactory,
         )
-        settingsDestination()
+        settingsDestination(
+            factory = accountSettingsViewModelFactory,
+        )
         transactionEntryDestination(
             navController = navController,
             factory = transactionEntryViewModelFactory,
@@ -104,7 +109,7 @@ private fun NavGraphBuilder.reportsDestination(factory: MonthlyReportViewModelFa
     }
 }
 
-private fun NavGraphBuilder.settingsDestination() {
+private fun NavGraphBuilder.settingsDestination(factory: AccountSettingsViewModelFactory) {
     composable(
         route = LedgerDestination.SETTINGS.route,
         deepLinks = listOf(
@@ -113,10 +118,7 @@ private fun NavGraphBuilder.settingsDestination() {
             },
         ),
     ) {
-        FutureFeatureScreen(
-            title = "Settings",
-            message = "Accounts, categories, reminders, security, and sync controls will live here.",
-        )
+        AccountSettingsRoute(factory = factory)
     }
 }
 

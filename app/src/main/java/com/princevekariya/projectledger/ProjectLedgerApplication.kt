@@ -8,13 +8,16 @@ import com.princevekariya.projectledger.core.database.repository.createRepositor
 import com.princevekariya.projectledger.di.AppContainer
 import com.princevekariya.projectledger.di.DefaultAppContainer
 import com.princevekariya.projectledger.di.SystemEpochTimeProvider
+import com.princevekariya.projectledger.di.UuidAccountIdGenerator
 import com.princevekariya.projectledger.di.UuidTransactionIdGenerator
+import com.princevekariya.projectledger.domain.transactions.account.CreateFinancialAccountUseCase
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
 import com.princevekariya.projectledger.feature.dashboard.DashboardRepositories
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.reports.MonthlyReportRepositories
 import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
+import com.princevekariya.projectledger.feature.settings.AccountSettingsViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionHistoryRepositories
 import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
@@ -53,6 +56,10 @@ class ProjectLedgerApplication : Application() {
             idGenerator = UuidTransactionIdGenerator,
             timeProvider = SystemEpochTimeProvider,
         )
+        val createFinancialAccount = CreateFinancialAccountUseCase(
+            accountRepository = repositories.accounts,
+            idGenerator = UuidAccountIdGenerator,
+        )
         appContainer = DefaultAppContainer(
             appLogger = appLogger,
             repositories = repositories,
@@ -61,6 +68,7 @@ class ProjectLedgerApplication : Application() {
                 categoryRepository = repositories.categories,
             ),
             saveManualTransaction = saveManualTransaction,
+            createFinancialAccount = createFinancialAccount,
             transactionEntryViewModelFactory = TransactionEntryViewModelFactory(
                 accountRepository = repositories.accounts,
                 categoryRepository = repositories.categories,
@@ -87,6 +95,12 @@ class ProjectLedgerApplication : Application() {
                 ),
                 timeProvider = SystemEpochTimeProvider,
                 zoneId = ZoneId.systemDefault(),
+                appLogger = appLogger,
+            ),
+            accountSettingsViewModelFactory =
+            AccountSettingsViewModelFactory(
+                accountRepository = repositories.accounts,
+                createFinancialAccount = createFinancialAccount,
                 appLogger = appLogger,
             ),
             dashboardViewModelFactoryProvider = { initialState ->
@@ -137,6 +151,10 @@ class ProjectLedgerApplication : Application() {
         appLogger.info(
             event = "monthly_report_factory_ready",
             message = "The live Room monthly report factory is ready.",
+        )
+        appLogger.info(
+            event = "account_management_factory_ready",
+            message = "Account management and creation are ready.",
         )
     }
 

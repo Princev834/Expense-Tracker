@@ -4,6 +4,8 @@ import com.princevekariya.projectledger.core.common.NoOpAppLogger
 import com.princevekariya.projectledger.core.database.repository.LedgerRepositories
 import com.princevekariya.projectledger.core.model.AppDistribution
 import com.princevekariya.projectledger.core.model.AppVariantConfiguration
+import com.princevekariya.projectledger.domain.transactions.account.AccountIdGenerator
+import com.princevekariya.projectledger.domain.transactions.account.CreateFinancialAccountUseCase
 import com.princevekariya.projectledger.domain.transactions.bootstrap.EnsureDefaultLedgerDataUseCase
 import com.princevekariya.projectledger.domain.transactions.command.EpochTimeProvider
 import com.princevekariya.projectledger.domain.transactions.command.SaveManualTransactionUseCase
@@ -18,6 +20,7 @@ import com.princevekariya.projectledger.feature.dashboard.DashboardUiState
 import com.princevekariya.projectledger.feature.dashboard.DashboardViewModelFactory
 import com.princevekariya.projectledger.feature.reports.MonthlyReportRepositories
 import com.princevekariya.projectledger.feature.reports.MonthlyReportViewModelFactory
+import com.princevekariya.projectledger.feature.settings.AccountSettingsViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionEntryViewModelFactory
 import com.princevekariya.projectledger.feature.transactions.TransactionHistoryRepositories
 import com.princevekariya.projectledger.feature.transactions.TransactionHistoryViewModelFactory
@@ -38,8 +41,12 @@ class DefaultAppContainerTest {
             fixture.container.ensureDefaultLedgerData,
         )
         assertSame(
-            fixture.saver,
+            fixture.transactionSaver,
             fixture.container.saveManualTransaction,
+        )
+        assertSame(
+            fixture.accountCreator,
+            fixture.container.createFinancialAccount,
         )
         assertSame(
             fixture.entryFactory,
@@ -52,6 +59,10 @@ class DefaultAppContainerTest {
         assertSame(
             fixture.reportFactory,
             fixture.container.monthlyReportViewModelFactory,
+        )
+        assertSame(
+            fixture.settingsFactory,
+            fixture.container.accountSettingsViewModelFactory,
         )
         assertSame(
             fixture.dashboardFactory,
@@ -78,22 +89,26 @@ class DefaultAppContainerTest {
             accountRepository = accounts,
             categoryRepository = categories,
         )
-        val saver = SaveManualTransactionUseCase(
+        val transactionSaver = SaveManualTransactionUseCase(
             accountRepository = accounts,
             categoryRepository = categories,
             merchantRepository = merchants,
             transactionRepository = transactions,
             idGenerator = TransactionIdGenerator {
-                "unused-id"
+                "unused-transaction-id"
             },
-            timeProvider = EpochTimeProvider {
-                0L
+            timeProvider = zeroTimeProvider(),
+        )
+        val accountCreator = CreateFinancialAccountUseCase(
+            accountRepository = accounts,
+            idGenerator = AccountIdGenerator {
+                "unused-account-id"
             },
         )
         val entryFactory = TransactionEntryViewModelFactory(
             accountRepository = accounts,
             categoryRepository = categories,
-            saveManualTransaction = saver,
+            saveManualTransaction = transactionSaver,
             appLogger = NoOpAppLogger,
         )
         val historyFactory = TransactionHistoryViewModelFactory(
@@ -116,6 +131,11 @@ class DefaultAppContainerTest {
             zoneId = ZoneOffset.UTC,
             appLogger = NoOpAppLogger,
         )
+        val settingsFactory = AccountSettingsViewModelFactory(
+            accountRepository = accounts,
+            createFinancialAccount = accountCreator,
+            appLogger = NoOpAppLogger,
+        )
         val initialDashboardState = dashboardState()
         val dashboardFactory = DashboardViewModelFactory(
             initialState = initialDashboardState,
@@ -133,10 +153,12 @@ class DefaultAppContainerTest {
             appLogger = NoOpAppLogger,
             repositories = repositories,
             ensureDefaultLedgerData = initializer,
-            saveManualTransaction = saver,
+            saveManualTransaction = transactionSaver,
+            createFinancialAccount = accountCreator,
             transactionEntryViewModelFactory = entryFactory,
             transactionHistoryViewModelFactory = historyFactory,
             monthlyReportViewModelFactory = reportFactory,
+            accountSettingsViewModelFactory = settingsFactory,
             dashboardViewModelFactoryProvider = {
                 dashboardFactory
             },
@@ -152,7 +174,7 @@ class DefaultAppContainerTest {
                 isPlayStoreSafe = false,
             ),
             platformDescription = "Android test device",
-            moduleCount = 10,
+            moduleCount = 11,
         )
 
         fun zeroTimeProvider(): EpochTimeProvider = EpochTimeProvider {

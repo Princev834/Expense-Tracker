@@ -31,6 +31,7 @@ Project Ledger is an offline-first Android personal finance application being bu
 - Phase 22: Live Room dashboard — complete
 - Phase 23: Live transaction history and filters — complete
 - Phase 24: Live monthly reports and category breakdown — complete
+- Phase 25: Account management and creation — complete
 
 ## Development baseline
 
@@ -83,7 +84,7 @@ Do not commit local SDK paths, signing keys, environment files, service credenti
 ## Foundation checkpoints
 
 - Product flavors separate the directly installed personal APK from the future Play Store-safe build.
-- Ten Gradle modules establish explicit `core`, `domain`, `feature`, and `platform` boundaries.
+- Eleven Gradle modules establish explicit `core`, `domain`, `feature`, and `platform` boundaries.
 - Spotless, ktlint, detekt, compiler-warning enforcement, and a pre-commit hook protect the codebase.
 - GitHub Actions runs quality checks, unit tests, and both debug builds on pushes and pull requests.
 - The design system now provides centralized colors, typography, shapes, spacing, elevation, and motion tokens.
@@ -159,3 +160,11 @@ and payment method details, and can be filtered by all, expense, or income.
 The Reports tab now uses live Room data. Users can move between months, review
 income, expenses, net cash flow, transaction count, and see expense categories
 ranked by exact spending with proportional visual bars.
+
+
+## Phase 25
+
+The Settings tab now manages real financial accounts. It lists every Room
+account and provides an inline form for creating cash, bank, credit-card,
+wallet, or other accounts with an exact opening balance. New accounts
+immediately become available to transaction entry and dashboard totals.
